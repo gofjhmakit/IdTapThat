@@ -377,6 +377,24 @@ input  { font-family: inherit; color: var(--text); }
   white-space: nowrap;
 }
 
+.revive-btn {
+  position: absolute;
+  bottom: .65rem; left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(.58rem,1.5vw,.78rem);
+  font-weight: 700; font-family: inherit;
+  background: rgba(0,0,0,.75);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--muted);
+  padding: .22rem .55rem;
+  cursor: pointer; z-index: 6;
+  letter-spacing: .04em;
+  white-space: nowrap;
+  transition: background .12s, color .12s;
+}
+.revive-btn:hover { background: rgba(233,69,96,.2); color: var(--text); border-color: var(--accent); }
+
 /* --- Turn Controls Bar --- */
 .turnbar {
   display: flex; align-items: center; gap: .4rem;
@@ -883,6 +901,8 @@ input  { font-family: inherit; color: var(--text); }
       <span class="tb-lbl">Round #</span>
       <span class="tb-val" id="round-num" aria-label="Round number">1</span>
     </div>
+    <button class="tb-sound-btn" id="tb-pause-btn" aria-label="Pause timers" title="Pause timers">⏸</button>
+    <button class="tb-sound-btn" id="tb-undo-btn" aria-label="Undo last life change" title="Undo life change">↩</button>
     <button class="tb-sound-btn sound-toggle-btn" id="sound-toggle-game" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
     <button class="menu-btn" id="menu-btn" aria-label="Open menu" aria-haspopup="dialog">☰</button>
   </div>
@@ -953,6 +973,20 @@ input  { font-family: inherit; color: var(--text); }
       <button class="menu-item" id="mi-reset-turn">⏱️ Reset Turn Timer</button>
       <button class="menu-item danger" id="mi-end">🏁 End Game → Results</button>
       <button class="menu-item danger" id="mi-new">🔃 New Game (Back to Setup)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Elimination Confirm -->
+<div id="elim-confirm-modal" class="modal-overlay hidden">
+  <div class="modal-box" style="max-width:340px;text-align:center;">
+    <div class="modal-head" style="justify-content:center;">
+      <span class="modal-title" style="font-size:1.1rem;">💀 Confirm Elimination?</span>
+    </div>
+    <p id="elim-confirm-msg" style="color:var(--muted);font-size:.9rem;margin-bottom:1.25rem;line-height:1.6;margin-top:.25rem;"></p>
+    <div style="display:flex;gap:.65rem;">
+      <button id="elim-cancel-btn" class="menu-item" style="flex:1;justify-content:center;">✕ Cancel</button>
+      <button id="elim-confirm-btn" class="menu-item danger" style="flex:1;justify-content:center;">💀 Eliminate</button>
     </div>
   </div>
 </div>
@@ -1567,6 +1601,8 @@ function handleGameKeys(e) {
    STATE
    ============================================================ */
 let G = createInitialState();
+let lifeUndoStack = [];   // [{idx, prevLife}]
+let pendingElim   = null; // {idx, cause} — awaiting confirm
 
 function createInitialState() {
   return {
@@ -1680,6 +1716,8 @@ function startGame() {
   G.history = [];
   G.over    = false;
   G.winner  = -1;
+  lifeUndoStack.length = 0;
+  pendingElim = null;
 
   snapshotHistory();
   renderGame();
@@ -1814,6 +1852,11 @@ function buildCard(p, idx) {
     st.className = 'elim-stamp';
     st.textContent = 'DEFEATED';
     card.appendChild(st);
+    const rv = document.createElement('button');
+    rv.className = 'revive-btn';
+    rv.textContent = '↩ Revive';
+    rv.addEventListener('click', e => { e.stopPropagation(); revivePlayer(idx); });
+    card.appendChild(rv);
   }
 
   return card;
@@ -1882,6 +1925,8 @@ function makeTapHandler(idx) {
 function applyLifeDelta(idx, delta) {
   if (G.over || G.players[idx].eliminated) return;
   const p = G.players[idx];
+  lifeUndoStack.push({idx, prevLife: p.life});
+  if (lifeUndoStack.length > 50) lifeUndoStack.shift();
   p.life += delta;
   showLifeAnim(idx, delta);
   refreshCard(idx);
@@ -1893,6 +1938,8 @@ function applyLifeDelta(idx, delta) {
 function setLife(idx, val) {
   if (G.over || G.players[idx].eliminated) return;
   const old = G.players[idx].life;
+  lifeUndoStack.push({idx, prevLife: old});
+  if (lifeUndoStack.length > 50) lifeUndoStack.shift();
   G.players[idx].life = val;
   showLifeAnim(idx, val - old);
   refreshCard(idx);
@@ -1928,8 +1975,15 @@ function refreshCard(idx) {
       st.className = 'elim-stamp';
       st.textContent = 'DEFEATED';
       card.appendChild(st);
+      const rv = document.createElement('button');
+      rv.className = 'revive-btn';
+      rv.textContent = '↩ Revive';
+      rv.addEventListener('click', e => { e.stopPropagation(); revivePlayer(idx); });
+      card.appendChild(rv);
     } else if (!p.eliminated && existing) {
       existing.remove();
+      const existingRv = card.querySelector('.revive-btn');
+      if (existingRv) existingRv.remove();
     }
   }
 }
@@ -1960,6 +2014,7 @@ function calcMaxCdr(idx) {
 function checkElim(idx) {
   const p = G.players[idx];
   if (p.eliminated) return;
+  if (pendingElim && pendingElim.idx === idx) return; // already awaiting confirm
   let cause = '';
 
   if (p.life <= 0) {
@@ -1974,13 +2029,81 @@ function checkElim(idx) {
   }
 
   if (cause) {
-    p.eliminated  = true;
-    p.elimRound   = G.round;
-    p.elimCause   = cause;
-    refreshCard(idx);
-    sfxDeath();
-    ariaAnnounce(`${p.name} eliminated! Cause: ${cause}`);
-    checkWinner();
+    pendingElim = {idx, cause};
+    closeCdrModal(); closePoisonModal(); closeAmountModal();
+    openElimConfirmModal();
+  }
+}
+
+function openElimConfirmModal() {
+  if (!pendingElim) return;
+  const p = G.players[pendingElim.idx];
+  document.getElementById('elim-confirm-msg').innerHTML =
+    `<strong style="color:${p.color}">${p.name}</strong> would be eliminated.<br>
+     <span style="color:var(--accent);font-weight:700;">${pendingElim.cause}</span>`;
+  document.getElementById('elim-confirm-modal').classList.remove('hidden');
+}
+
+function closeElimConfirmModal() {
+  document.getElementById('elim-confirm-modal').classList.add('hidden');
+}
+
+function confirmElim() {
+  if (!pendingElim) return;
+  const {idx, cause} = pendingElim;
+  pendingElim = null;
+  closeElimConfirmModal();
+  const p = G.players[idx];
+  p.eliminated = true;
+  p.elimRound  = G.round;
+  p.elimCause  = cause;
+  refreshCard(idx);
+  sfxDeath();
+  ariaAnnounce(`${p.name} eliminated! Cause: ${cause}`);
+  checkWinner();
+}
+
+function cancelElim() {
+  pendingElim = null;
+  closeElimConfirmModal();
+}
+
+function undoLifeChange() {
+  if (G.over || !lifeUndoStack.length) return;
+  const {idx, prevLife} = lifeUndoStack.pop();
+  const p = G.players[idx];
+  // Clear a life-based pending elimination if undoing brings life back up
+  if (pendingElim && pendingElim.idx === idx && pendingElim.cause === 'Life ≤ 0' && prevLife > 0) {
+    pendingElim = null;
+    closeElimConfirmModal();
+  }
+  const currLife = p.life;
+  p.life = prevLife;
+  showLifeAnim(idx, prevLife - currLife);
+  refreshCard(idx);
+  ariaAnnounce(`Undo: ${p.name} back to ${p.life} life.`);
+}
+
+function revivePlayer(idx) {
+  const p = G.players[idx];
+  if (!p.eliminated) return;
+  p.eliminated = false;
+  p.elimRound  = null;
+  p.elimCause  = '';
+  if (p.life <= 0) p.life = 1;
+  refreshCard(idx);
+  ariaAnnounce(`${p.name} revived with ${p.life} life.`);
+}
+
+function togglePause() {
+  G.timers.paused = !G.timers.paused;
+  const lbl = document.getElementById('pause-lbl');
+  if (lbl) lbl.textContent = G.timers.paused ? 'Resume Timers' : 'Pause Timers';
+  const pbtn = document.getElementById('tb-pause-btn');
+  if (pbtn) {
+    pbtn.textContent = G.timers.paused ? '▶' : '⏸';
+    pbtn.title = G.timers.paused ? 'Resume timers' : 'Pause timers';
+    pbtn.setAttribute('aria-label', G.timers.paused ? 'Resume timers' : 'Pause timers');
   }
 }
 
@@ -2543,6 +2666,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (lifeSel) lifeSel._userOverride = true;
   });
 
+  document.getElementById('tb-pause-btn').addEventListener('click', togglePause);
+  document.getElementById('tb-undo-btn').addEventListener('click', undoLifeChange);
+  document.getElementById('elim-confirm-btn').addEventListener('click', confirmElim);
+  document.getElementById('elim-cancel-btn').addEventListener('click', cancelElim);
+  document.getElementById('elim-confirm-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('elim-confirm-modal')) cancelElim();
+  });
+
   // Game controls
   document.getElementById('btn-next').addEventListener('click', nextTurn);
   document.getElementById('btn-endrnd').addEventListener('click', endRound);
@@ -2581,10 +2712,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('menu-modal').addEventListener('click', e => {
     if (e.target === document.getElementById('menu-modal')) closeMenu();
   });
-  document.getElementById('mi-pause').addEventListener('click', () => {
-    G.timers.paused = !G.timers.paused;
-    document.getElementById('pause-lbl').textContent = G.timers.paused ? 'Resume Timers' : 'Pause Timers';
-  });
+  document.getElementById('mi-pause').addEventListener('click', () => { togglePause(); });
   document.getElementById('mi-reset-round').addEventListener('click', () => {
     G.timers.round = 0;
     document.getElementById('t-round').textContent = fmtTime(0);
