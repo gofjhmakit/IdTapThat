@@ -836,6 +836,7 @@ input  { font-family: inherit; color: var(--text); }
   transition: background .15s;
 }
 .tb-sound-btn:hover { background: rgba(255,255,255,.08); }
+.music-muted { opacity: .35; }
 </style>
 </head>
 <body>
@@ -850,6 +851,7 @@ input  { font-family: inherit; color: var(--text); }
   <div id="main-content" style="display:contents"></div>
   <div class="topbar-controls">
     <button class="util-btn sound-toggle-btn" id="sound-toggle-setup" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
+    <button class="util-btn music-toggle-btn" id="music-toggle-setup" aria-label="Music on (click to mute)" title="Toggle music">🎵</button>
     <button class="util-btn hc-toggle-btn" id="hc-toggle-setup" aria-pressed="false" aria-label="Toggle high-contrast mode" title="High contrast">◑</button>
   </div>
   <div class="setup-logo" aria-label="I'd Tap That MTG Life Calculator">⚡ I'D TAP THAT</div>
@@ -903,6 +905,7 @@ input  { font-family: inherit; color: var(--text); }
     </div>
     <button class="tb-sound-btn" id="tb-pause-btn" aria-label="Pause timers" title="Pause timers">⏸</button>
     <button class="tb-sound-btn" id="tb-undo-btn" aria-label="Undo last life change" title="Undo life change">↩</button>
+    <button class="tb-sound-btn music-toggle-btn" id="music-toggle-game" aria-label="Music on (click to mute)" title="Toggle music">🎵</button>
     <button class="tb-sound-btn sound-toggle-btn" id="sound-toggle-game" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
     <button class="menu-btn" id="menu-btn" aria-label="Open menu" aria-haspopup="dialog">☰</button>
   </div>
@@ -1040,6 +1043,7 @@ input  { font-family: inherit; color: var(--text); }
 <div id="tournament-screen" class="screen hidden" aria-label="Tournament">
   <div class="topbar-controls">
     <button class="util-btn sound-toggle-btn" id="sound-toggle-tourn" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
+    <button class="util-btn music-toggle-btn" id="music-toggle-tourn" aria-label="Music on (click to mute)" title="Toggle music">🎵</button>
     <button class="util-btn hc-toggle-btn" id="hc-toggle-tourn" aria-pressed="false" aria-label="Toggle high-contrast mode" title="High contrast">◑</button>
   </div>
   <div class="setup-logo" style="font-size:clamp(1.6rem,5vw,3rem)">🏆 TOURNAMENT</div>
@@ -1130,6 +1134,7 @@ const CAREER_KEY = 'idtapthat_career';
    ============================================================ */
 let audioCtx = null;
 let soundEnabled = true;
+let musicEnabled = true;
 let ytPlayer = null;
 let ytReady = false;
 let wantAmbient = false; // true while a game is running
@@ -1157,7 +1162,7 @@ function onYouTubeIframeAPIReady() {
         ytReady = true;
         try { ytPlayer.setVolume(30); } catch(e) {}
         // startGame() may have been called before the API finished loading
-        if (wantAmbient && soundEnabled) {
+        if (wantAmbient && musicEnabled) {
           try { ytPlayer.playVideo(); } catch(e) {}
         }
       },
@@ -1208,7 +1213,7 @@ function sfxWin()     { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTon
 
 function startAmbient() {
   wantAmbient = true;
-  if (!soundEnabled) return;
+  if (!musicEnabled) return;
   if (ytReady && ytPlayer) {
     try { ytPlayer.playVideo(); } catch(e) {}
   }
@@ -1224,11 +1229,6 @@ function stopAmbient() {
 
 function toggleSound() {
   soundEnabled = !soundEnabled;
-  if (soundEnabled) {
-    startAmbient();
-  } else {
-    stopAmbient();
-  }
   const label = soundEnabled ? 'Sound on (click to mute)' : 'Sound off (click to unmute)';
   const icon  = soundEnabled ? '🔊' : '🔇';
   document.querySelectorAll('.sound-toggle-btn').forEach(b => {
@@ -1236,6 +1236,21 @@ function toggleSound() {
     b.setAttribute('aria-label', label);
   });
   try { localStorage.setItem('idtapthat_sound', soundEnabled ? '1' : '0'); } catch(e) {}
+}
+
+function toggleMusic() {
+  musicEnabled = !musicEnabled;
+  if (musicEnabled && wantAmbient) {
+    if (ytReady && ytPlayer) try { ytPlayer.playVideo(); } catch(e) {}
+  } else if (!musicEnabled) {
+    if (ytReady && ytPlayer) try { ytPlayer.pauseVideo(); } catch(e) {}
+  }
+  document.querySelectorAll('.music-toggle-btn').forEach(b => {
+    b.classList.toggle('music-muted', !musicEnabled);
+    b.setAttribute('aria-label', musicEnabled ? 'Music on (click to mute)' : 'Music off (click to unmute)');
+    b.setAttribute('title', musicEnabled ? 'Toggle music' : 'Toggle music (muted)');
+  });
+  try { localStorage.setItem('idtapthat_music', musicEnabled ? '1' : '0'); } catch(e) {}
 }
 
 /* ============================================================
@@ -2651,6 +2666,13 @@ document.addEventListener('DOMContentLoaded', () => {
         b.setAttribute('aria-label', 'Sound off (click to unmute)');
       });
     }
+    if (localStorage.getItem('idtapthat_music') === '0') {
+      musicEnabled = false;
+      document.querySelectorAll('.music-toggle-btn').forEach(b => {
+        b.classList.add('music-muted');
+        b.setAttribute('aria-label', 'Music off (click to unmute)');
+      });
+    }
     if (localStorage.getItem('idtapthat_hc') === '1') {
       highContrastMode = true;
       document.documentElement.classList.add('hc-mode');
@@ -2667,6 +2689,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Sound & high-contrast toggles (all screens)
   document.querySelectorAll('.sound-toggle-btn').forEach(b => b.addEventListener('click', toggleSound));
+  document.querySelectorAll('.music-toggle-btn').forEach(b => b.addEventListener('click', toggleMusic));
   document.querySelectorAll('.hc-toggle-btn').forEach(b => b.addEventListener('click', toggleHighContrast));
 
   // Tournament screen
