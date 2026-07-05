@@ -6,7 +6,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Moxtopper – MTG Life Calculator</title>
+<meta name="theme-color" content="#0b0b14">
+<link rel="manifest" href="manifest.json">
+<title>I'd Tap That – MTG Life Calculator</title>
 <style>
 /* ============================================================
    RESET & BASE
@@ -586,23 +588,6 @@ input  { font-family: inherit; color: var(--text); }
   max-width: 600px; width: 100%;
 }
 
-.future-wrap { width: 100%; max-width: 620px; }
-.future-wrap h3 {
-  font-size: .72rem; text-transform: uppercase;
-  letter-spacing: .12em; color: var(--muted);
-  margin-bottom: .75rem;
-}
-.future-list { list-style: none; display: grid; gap: .45rem; }
-.future-list li {
-  display: flex; gap: .65rem; align-items: flex-start;
-  background: rgba(255,255,255,.03);
-  border: 1px solid var(--border);
-  border-radius: 9px; padding: .55rem .8rem;
-  font-size: clamp(.68rem,1.4vw,.83rem);
-  line-height: 1.45;
-}
-.future-n { color: var(--accent); font-weight: 700; flex-shrink: 0; min-width: 18px; }
-
 .play-again-btn {
   padding: .75rem 2.5rem;
   font-size: clamp(.85rem,2.5vw,1.05rem);
@@ -640,15 +625,216 @@ input  { font-family: inherit; color: var(--text); }
 @media screen and (orientation: portrait) and (max-width: 520px) {
   /* portrait phone with 6+ players – show hint via JS if needed */
 }
+
+/* ============================================================
+   SKIP LINK (accessibility)
+   ============================================================ */
+.skip-link {
+  position: fixed; top: -100px; left: 1rem; z-index: 9999;
+  background: var(--accent); color: #fff;
+  padding: .5rem 1rem; border-radius: 8px;
+  font-weight: 700; text-decoration: none;
+  transition: top .1s;
+}
+.skip-link:focus { top: 1rem; }
+
+/* ============================================================
+   GLOBAL FOCUS STYLE (accessibility)
+   ============================================================ */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+
+/* ============================================================
+   A11Y / SOUND CONTROLS BAR
+   ============================================================ */
+.topbar-controls {
+  display: flex; gap: .5rem; justify-content: flex-end;
+  width: 100%; max-width: 580px;
+  margin-bottom: -.5rem;
+}
+.util-btn {
+  padding: .3rem .55rem;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text); font-size: .82rem;
+  transition: background .15s;
+}
+.util-btn:hover { background: rgba(255,255,255,.12); }
+.util-btn[aria-pressed="true"] { border-color: var(--accent); }
+
+/* ============================================================
+   COMMANDER INPUT
+   ============================================================ */
+.commander-input {
+  flex: 1;
+  padding: .35rem .65rem;
+  background: rgba(255,255,255,.04);
+  border: 1px dashed var(--border);
+  border-radius: 9px;
+  font-size: .78rem;
+  color: var(--muted);
+  transition: border-color .15s, color .15s;
+}
+.commander-input:focus {
+  outline: none; border-color: var(--teal); color: var(--text);
+}
+.commander-input::placeholder { font-size: .72rem; }
+
+/* ============================================================
+   CAREER STATS MODAL
+   ============================================================ */
+.career-clear-btn {
+  padding: .4rem .9rem;
+  background: rgba(233,69,96,.12);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  color: var(--accent); font-size: .78rem; cursor: pointer;
+  transition: background .15s;
+}
+.career-clear-btn:hover { background: rgba(233,69,96,.25); }
+
+/* ============================================================
+   TOURNAMENT SCREEN
+   ============================================================ */
+#tournament-screen {
+  background: radial-gradient(ellipse at 50% 0%, #1a0a30 0%, var(--bg) 70%);
+  overflow-y: auto;
+  align-items: center;
+  padding: 2rem 1rem 3rem;
+  gap: 1.25rem;
+}
+
+.tourn-section-label {
+  font-size: .68rem; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--muted);
+  width: 100%; max-width: 620px;
+  margin-bottom: -.5rem;
+}
+
+.tourn-standings-wrap {
+  width: 100%; max-width: 620px;
+}
+.tourn-standings-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: clamp(.68rem,1.5vw,.88rem);
+}
+.tourn-standings-wrap th {
+  padding: .4rem .65rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted); font-size: .65rem;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.tourn-standings-wrap td {
+  padding: .4rem .65rem;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+
+.tourn-pairings-wrap {
+  width: 100%; max-width: 620px;
+  display: grid; gap: .75rem;
+}
+
+.pod-card {
+  background: rgba(255,255,255,.04);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .85rem 1.1rem;
+}
+.pod-card.pod-done { border-color: var(--teal); opacity: .8; }
+.pod-header {
+  font-size: .7rem; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted);
+  margin-bottom: .45rem;
+}
+.pod-players {
+  display: flex; flex-wrap: wrap; gap: .4rem;
+  font-size: .9rem; font-weight: 600;
+}
+.pod-vs { color: var(--muted); font-size: .72rem; align-self: center; }
+.pod-start-btn {
+  margin-top: .6rem;
+  padding: .35rem .9rem;
+  background: linear-gradient(90deg, var(--accent), #ff6b35);
+  border: none; border-radius: 8px;
+  color: #fff; font-size: .82rem; font-weight: 700;
+  cursor: pointer; transition: opacity .15s;
+}
+.pod-start-btn:hover { opacity: .85; }
+.pod-winner-note {
+  margin-top: .4rem;
+  font-size: .75rem; color: var(--muted);
+}
+
+.tourn-actions-wrap {
+  width: 100%; max-width: 620px;
+  display: flex; flex-direction: column; align-items: center; gap: .75rem;
+}
+
+.tourn-format-row {
+  display: flex; gap: .65rem; flex-wrap: wrap; align-items: center;
+}
+.tourn-format-row label {
+  font-size: .82rem; color: var(--text);
+}
+.tourn-select {
+  padding: .35rem .65rem;
+  background: rgba(255,255,255,.06);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text); font-size: .82rem;
+}
+
+/* ============================================================
+   HIGH-CONTRAST THEME
+   ============================================================ */
+.hc-mode {
+  --bg:      #000000;
+  --surface: #111111;
+  --surface2:#1a1a1a;
+  --accent:  #ff0040;
+  --gold:    #ffee00;
+  --teal:    #00ffee;
+  --text:    #ffffff;
+  --muted:   #aaaaaa;
+  --border:  #444444;
+}
+.hc-mode .player-card { border: 2px solid var(--border); }
+.hc-mode .life-total { text-shadow: 0 0 8px currentColor; }
+
+/* ============================================================
+   SOUND TOGGLE IN GAME TOPBAR
+   ============================================================ */
+.tb-sound-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text); padding: .22rem .4rem;
+  font-size: .85rem; flex-shrink: 0;
+  transition: background .15s;
+}
+.tb-sound-btn:hover { background: rgba(255,255,255,.08); }
 </style>
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Skip to main content</a>
+<div id="aria-live" aria-live="polite" aria-atomic="true" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap"></div>
+
 <!-- ============================================================
      SETUP SCREEN
      ============================================================ -->
-<div id="setup-screen" class="screen">
-  <div class="setup-logo">⚡ MOXTOPPER</div>
+<div id="setup-screen" class="screen" aria-label="Game setup">
+  <div id="main-content" style="display:contents"></div>
+  <div class="topbar-controls">
+    <button class="util-btn sound-toggle-btn" id="sound-toggle-setup" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
+    <button class="util-btn hc-toggle-btn" id="hc-toggle-setup" aria-pressed="false" aria-label="Toggle high-contrast mode" title="High contrast">◑</button>
+  </div>
+  <div class="setup-logo" aria-label="I'd Tap That MTG Life Calculator">⚡ I'D TAP THAT</div>
   <div class="setup-sub">Magic: The Gathering Life Calculator</div>
 
   <div class="setup-card">
@@ -666,48 +852,50 @@ input  { font-family: inherit; color: var(--text); }
     <div class="player-configs" id="pcfg-list"></div>
   </div>
 
-  <button class="start-btn" id="start-btn">⚡ Start Game</button>
+  <button class="start-btn" id="start-btn" aria-label="Start game">⚡ Start Game</button>
+  <button class="start-btn" id="tournament-btn" aria-label="Open tournament mode" style="background:linear-gradient(90deg,#0f3460 0%,#1a4a7a 100%);box-shadow:0 4px 24px rgba(15,52,96,.55)">🏆 Tournament Mode</button>
 </div>
 
 <!-- ============================================================
      GAME SCREEN
      ============================================================ -->
-<div id="game-screen" class="screen hidden">
+<div id="game-screen" class="screen hidden" aria-label="Game in progress">
   <!-- Top bar -->
-  <div class="topbar">
+  <div class="topbar" role="toolbar" aria-label="Game controls">
     <div class="tb-item">
       <span class="tb-lbl">Total</span>
-      <span class="tb-val" id="t-total">00:00</span>
+      <span class="tb-val" id="t-total" aria-label="Total time">00:00</span>
     </div>
     <div class="tb-sep"></div>
     <div class="tb-item">
       <span class="tb-lbl">Round</span>
-      <span class="tb-val" id="t-round">00:00</span>
+      <span class="tb-val" id="t-round" aria-label="Round time">00:00</span>
     </div>
     <div class="tb-sep"></div>
-    <span class="tb-brand">⚡ MOXTOPPER</span>
+    <span class="tb-brand" aria-hidden="true">⚡ I'D TAP THAT</span>
     <div class="tb-sep"></div>
     <div class="tb-item">
       <span class="tb-lbl">Turn</span>
-      <span class="tb-val" id="t-turn">00:00</span>
+      <span class="tb-val" id="t-turn" aria-label="Turn time">00:00</span>
     </div>
     <div class="tb-sep"></div>
     <div class="tb-item">
       <span class="tb-lbl">Round #</span>
-      <span class="tb-val" id="round-num">1</span>
+      <span class="tb-val" id="round-num" aria-label="Round number">1</span>
     </div>
-    <button class="menu-btn" id="menu-btn">☰</button>
+    <button class="tb-sound-btn sound-toggle-btn" id="sound-toggle-game" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
+    <button class="menu-btn" id="menu-btn" aria-label="Open menu" aria-haspopup="dialog">☰</button>
   </div>
 
   <!-- Players grid -->
   <div class="players-grid" id="players-grid"></div>
 
   <!-- Turn controls -->
-  <div class="turnbar">
-    <div class="turn-info">Turn: <strong id="cur-name">—</strong></div>
-    <button class="ctrl-btn btn-next"    id="btn-next">Next Turn →</button>
-    <button class="ctrl-btn btn-endrnd"  id="btn-endrnd">End Round</button>
-    <button class="ctrl-btn btn-endgame" id="btn-endgame">End Game</button>
+  <div class="turnbar" role="toolbar" aria-label="Turn controls">
+    <div class="turn-info">Turn: <strong id="cur-name" aria-live="polite">—</strong></div>
+    <button class="ctrl-btn btn-next"    id="btn-next"    aria-label="Next turn (N)">Next Turn →</button>
+    <button class="ctrl-btn btn-endrnd"  id="btn-endrnd"  aria-label="End round (R)">End Round</button>
+    <button class="ctrl-btn btn-endgame" id="btn-endgame" aria-label="End game">End Game</button>
   </div>
 </div>
 
@@ -793,14 +981,79 @@ input  { font-family: inherit; color: var(--text); }
     <tbody id="results-body"></tbody>
   </table>
 
-  <div class="match-stats" id="match-stats"></div>
+  <div class="match-stats" id="match-stats" aria-live="polite"></div>
 
-  <div class="future-wrap">
-    <h3>💡 Future Development Ideas</h3>
-    <ul class="future-list" id="future-list"></ul>
+  <button class="play-again-btn" id="career-btn" aria-label="View career stats" style="background:linear-gradient(90deg,#0f3460,#1a4a7a);box-shadow:0 4px 20px rgba(15,52,96,.45)">📊 Career Stats</button>
+  <button class="play-again-btn" id="play-again-btn" aria-label="Play again">⚡ Play Again</button>
+</div>
+
+<!-- ============================================================
+     CAREER STATS MODAL
+     ============================================================ -->
+<div id="career-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="career-modal-title">
+  <div class="modal-box">
+    <div class="modal-head">
+      <span class="modal-title" id="career-modal-title">📊 Career Stats</span>
+      <button class="modal-close" id="career-close" aria-label="Close career stats">✕</button>
+    </div>
+    <div id="career-body"></div>
+  </div>
+</div>
+
+<!-- ============================================================
+     TOURNAMENT SCREEN
+     ============================================================ -->
+<div id="tournament-screen" class="screen hidden" aria-label="Tournament">
+  <div class="topbar-controls">
+    <button class="util-btn sound-toggle-btn" id="sound-toggle-tourn" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
+    <button class="util-btn hc-toggle-btn" id="hc-toggle-tourn" aria-pressed="false" aria-label="Toggle high-contrast mode" title="High contrast">◑</button>
+  </div>
+  <div class="setup-logo" style="font-size:clamp(1.6rem,5vw,3rem)">🏆 TOURNAMENT</div>
+  <div class="setup-sub" id="tourn-round-label">Round 1</div>
+
+  <!-- Format/Rounds setup (shown before tournament starts) -->
+  <div class="setup-card" id="tourn-setup-card">
+    <h3>Tournament Settings</h3>
+    <div class="tourn-format-row">
+      <label for="tourn-format-sel">Format:</label>
+      <select id="tourn-format-sel" class="tourn-select" aria-label="Tournament format">
+        <option value="swiss">Swiss Rounds</option>
+        <option value="elimination">Single Elimination</option>
+      </select>
+      <label for="tourn-rounds-sel" id="tourn-rounds-label">Rounds:</label>
+      <select id="tourn-rounds-sel" class="tourn-select" aria-label="Number of rounds">
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="8">8</option>
+      </select>
+    </div>
   </div>
 
-  <button class="play-again-btn" id="play-again-btn">⚡ Play Again</button>
+  <!-- Standings -->
+  <div class="tourn-section-label" id="tourn-standings-label" style="display:none">Standings</div>
+  <div class="tourn-standings-wrap" id="tourn-standings-wrap" style="display:none">
+    <table aria-label="Tournament standings">
+      <thead><tr>
+        <th>#</th><th>Player</th><th>W</th><th>L</th><th>Pts</th>
+      </tr></thead>
+      <tbody id="tourn-standings-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Current round pairings -->
+  <div class="tourn-section-label" id="tourn-pairings-label" style="display:none">Current Round Pairings</div>
+  <div class="tourn-pairings-wrap" id="tourn-pairings"></div>
+
+  <!-- Actions -->
+  <div class="tourn-actions-wrap" id="tourn-actions"></div>
+
+  <!-- Pre-start buttons -->
+  <div id="tourn-start-actions" style="display:flex;flex-direction:column;align-items:center;gap:.75rem;width:100%;max-width:580px">
+    <button class="start-btn" id="tourn-launch-btn" aria-label="Launch tournament">🏆 Launch Tournament</button>
+    <button class="start-btn" id="tourn-back-btn" aria-label="Back to setup" style="background:rgba(255,255,255,.06);border:1px solid var(--border);box-shadow:none;color:var(--muted)">← Back to Setup</button>
+  </div>
 </div>
 
 <!-- ============================================================
@@ -822,18 +1075,471 @@ const DEFAULT_NAMES = [
   'Frodo','Saruman','Sauron','Boromir'
 ];
 
-const FUTURE_IDEAS = [
-  { n:1,  t:'Offline PWA – installable on any device via service worker, fully playable without internet.' },
-  { n:2,  t:'Match history – persist all games in localStorage; view career win/loss stats per player.' },
-  { n:3,  t:'Scryfall card-art backgrounds – fetch commander card art from Scryfall API to theme each panel.' },
-  { n:4,  t:'Custom counters – configurable counter types: energy, experience, storm, rad, initiative, monarch.' },
-  { n:5,  t:'Multiplayer sync – real-time state sync via WebRTC so each player uses their own phone.' },
-  { n:6,  t:'Voice commands – Web Speech API: "Player 2 minus 7" or "end round" hands-free.' },
-  { n:7,  t:'Tournament mode – bracket generator, pairings, standings, and Swiss-round tracking.' },
-  { n:8,  t:'Sound design – ambient MTG music, satisfying SFX for damage, death, and round changes.' },
-  { n:9,  t:'Deck tracker – link decks to commanders and track win rates across sessions per deck.' },
-  { n:10, t:'Accessibility – full keyboard navigation, ARIA labels, high-contrast theme, screen reader support.' },
-];
+/* ============================================================
+   STORAGE KEYS
+   ============================================================ */
+const CAREER_KEY = 'idtapthat_career';
+
+/* ============================================================
+   SOUND SYSTEM (Web Audio API)
+   ============================================================ */
+let audioCtx = null;
+let soundEnabled = true;
+let ambientNodes = null;
+
+function getAudio() {
+  if (!audioCtx) {
+    try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) { return null; }
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+  return audioCtx;
+}
+
+function playTone(freq, type, duration, gainVal, freqEnd) {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudio(); if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const env = ctx.createGain();
+    osc.connect(env); env.connect(ctx.destination);
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    if (freqEnd) osc.frequency.exponentialRampToValueAtTime(freqEnd, ctx.currentTime + duration);
+    env.gain.setValueAtTime(gainVal || 0.25, ctx.currentTime);
+    env.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + duration + 0.01);
+  } catch(e) {}
+}
+
+function sfxDamage()  { playTone(220,'sawtooth',.14,.18,100); setTimeout(()=>playTone(160,'square',.1,.12),110); }
+function sfxHeal()    { [440,554,659].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',.18,.14),i*90)); }
+function sfxDeath()   { playTone(140,'sawtooth',.5,.28,55); setTimeout(()=>playTone(90,'sine',.7,.18),150); }
+function sfxRound()   { [523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',.28,.18),i*130)); }
+function sfxTurn()    { playTone(880,'sine',.07,.09); }
+function sfxWin()     { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',.38,.22),i*110)); }
+
+function startAmbient() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudio(); if (!ctx) return;
+    stopAmbient();
+    const master = ctx.createGain();
+    master.gain.setValueAtTime(0.035, ctx.currentTime);
+    master.connect(ctx.destination);
+    const oscs = [55, 82.41, 110].map((freq, i) => {
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.connect(g); g.connect(master);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq * (1 + i * 0.0018), ctx.currentTime);
+      g.gain.setValueAtTime(0.33, ctx.currentTime);
+      osc.start();
+      return { osc, gain: g };
+    });
+    const lfo = ctx.createOscillator(), lfoG = ctx.createGain();
+    lfo.connect(lfoG); lfoG.connect(master.gain);
+    lfo.frequency.setValueAtTime(0.04, ctx.currentTime);
+    lfoG.gain.setValueAtTime(0.018, ctx.currentTime);
+    lfo.start();
+    ambientNodes = { oscs, lfo, master };
+  } catch(e) {}
+}
+
+function stopAmbient() {
+  if (!ambientNodes) return;
+  try {
+    ambientNodes.oscs.forEach(({osc}) => osc.stop());
+    ambientNodes.lfo.stop();
+    ambientNodes.master.disconnect();
+  } catch(e) {}
+  ambientNodes = null;
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  if (soundEnabled) {
+    startAmbient();
+  } else {
+    stopAmbient();
+    try { if (audioCtx) audioCtx.suspend(); } catch(e) {}
+  }
+  const label = soundEnabled ? 'Sound on (click to mute)' : 'Sound off (click to unmute)';
+  const icon  = soundEnabled ? '🔊' : '🔇';
+  document.querySelectorAll('.sound-toggle-btn').forEach(b => {
+    b.textContent = icon;
+    b.setAttribute('aria-label', label);
+  });
+  try { localStorage.setItem('idtapthat_sound', soundEnabled ? '1' : '0'); } catch(e) {}
+}
+
+/* ============================================================
+   HIGH-CONTRAST
+   ============================================================ */
+let highContrastMode = false;
+
+function toggleHighContrast() {
+  highContrastMode = !highContrastMode;
+  document.documentElement.classList.toggle('hc-mode', highContrastMode);
+  document.querySelectorAll('.hc-toggle-btn').forEach(b => b.setAttribute('aria-pressed', highContrastMode.toString()));
+  try { localStorage.setItem('idtapthat_hc', highContrastMode ? '1' : '0'); } catch(e) {}
+}
+
+/* ============================================================
+   ARIA ANNOUNCER
+   ============================================================ */
+function ariaAnnounce(msg) {
+  const el = document.getElementById('aria-live');
+  if (!el) return;
+  el.textContent = '';
+  requestAnimationFrame(() => { el.textContent = msg; });
+}
+
+/* ============================================================
+   MATCH HISTORY (localStorage)
+   ============================================================ */
+function saveGameRecord() {
+  try {
+    const record = {
+      date: new Date().toISOString(),
+      winner: G.winner >= 0 ? G.players[G.winner].name : null,
+      totalTime: G.timers.total,
+      rounds: G.round,
+      startingLife: G.setupLife,
+      players: G.players.map(p => ({
+        name: p.name, color: p.color, life: p.life,
+        eliminated: p.eliminated, elimRound: p.elimRound, timer: p.timer,
+      })),
+    };
+    const hist = JSON.parse(localStorage.getItem(CAREER_KEY) || '[]');
+    hist.unshift(record);
+    if (hist.length > 300) hist.length = 300;
+    localStorage.setItem(CAREER_KEY, JSON.stringify(hist));
+  } catch(e) {}
+}
+
+function loadCareerHistory() {
+  try { return JSON.parse(localStorage.getItem(CAREER_KEY) || '[]'); } catch(e) { return []; }
+}
+
+function getCareerStatsByPlayer(history) {
+  const map = {};
+  history.forEach(game => {
+    game.players.forEach(p => {
+      if (!map[p.name]) map[p.name] = { name: p.name, color: p.color, wins: 0, losses: 0, games: 0 };
+      map[p.name].games++;
+      if (game.winner === p.name) map[p.name].wins++;
+      else map[p.name].losses++;
+    });
+  });
+  return Object.values(map).sort((a,b) => b.wins - a.wins || a.losses - b.losses);
+}
+
+function openCareerModal() {
+  const history = loadCareerHistory();
+  const body    = document.getElementById('career-body');
+  if (history.length === 0) {
+    body.innerHTML = '<p style="color:var(--muted);text-align:center;padding:1.5rem 0">No games recorded yet. Play some games to see your career stats!</p>';
+  } else {
+    const stats = getCareerStatsByPlayer(history);
+    body.innerHTML = `
+      <p style="color:var(--muted);font-size:.78rem;margin-bottom:.75rem">${history.length} game${history.length!==1?'s':''} recorded</p>
+      <table class="results-tbl" style="width:100%" aria-label="Career statistics">
+        <thead><tr><th>Player</th><th>Games</th><th>Wins</th><th>Losses</th><th>Win%</th></tr></thead>
+        <tbody>${stats.map(p=>`
+          <tr>
+            <td><span class="dot" style="background:${p.color}"></span>${p.name}</td>
+            <td>${p.games}</td>
+            <td style="color:var(--teal)">${p.wins}</td>
+            <td style="color:var(--accent)">${p.losses}</td>
+            <td>${p.games?Math.round(p.wins/p.games*100):0}%</td>
+          </tr>`).join('')}</tbody>
+      </table>
+      <div style="margin-top:1rem;text-align:center">
+        <button class="career-clear-btn" id="career-clear-btn" aria-label="Clear career history">🗑 Clear History</button>
+      </div>`;
+    document.getElementById('career-clear-btn').addEventListener('click', () => {
+      if (!confirm('Clear all career history? This cannot be undone.')) return;
+      try { localStorage.removeItem(CAREER_KEY); } catch(e) {}
+      openCareerModal();
+    });
+  }
+  document.getElementById('career-modal').classList.remove('hidden');
+  document.getElementById('career-close').focus();
+}
+
+function closeCareerModal() {
+  document.getElementById('career-modal').classList.add('hidden');
+}
+
+/* ============================================================
+   SCRYFALL CARD ART
+   ============================================================ */
+async function fetchCommanderArt(name) {
+  if (!name) return null;
+  try {
+    const url = `https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(name)}`;
+    const resp = await fetch(url, { headers: { Accept: 'application/json' } });
+    if (!resp.ok) return null;
+    const data = await resp.json();
+    return data.card_faces?.[0]?.image_uris?.art_crop
+      || data.image_uris?.art_crop
+      || null;
+  } catch(e) { return null; }
+}
+
+async function loadCommanderArts() {
+  const fetches = G.players.map(async (p) => {
+    if (p._commanderName) {
+      p.artUrl = await fetchCommanderArt(p._commanderName);
+    }
+  });
+  await Promise.allSettled(fetches);
+}
+
+/* ============================================================
+   TOURNAMENT MODE
+   ============================================================ */
+let TOURNAMENT = null;
+
+function createTournament(players, format, numRounds) {
+  return {
+    format, numRounds,
+    currentRound: 1,
+    started: false,
+    players: players.map(p => ({ ...p, points: 0, wins: 0, losses: 0, prevOpponents: [] })),
+    rounds: [],
+    activePod: null,
+  };
+}
+
+function generateSwissPods(players) {
+  const sorted = [...players.keys()].sort((a,b) => {
+    const d = players[b].points - players[a].points;
+    return d !== 0 ? d : (Math.random() - 0.5);
+  });
+  const tables = [];
+  for (let i = 0; i < sorted.length; i += 4) {
+    tables.push({ playerIndices: sorted.slice(i, Math.min(i+4, sorted.length)), result: null });
+  }
+  return tables;
+}
+
+function generateEliminationPods(players, prevRounds) {
+  // First round: random; subsequent rounds: winners advance
+  const eligible = prevRounds.length === 0
+    ? [...players.keys()].sort(() => Math.random() - 0.5)
+    : (() => {
+        // Collect winners from last round
+        const last = prevRounds[prevRounds.length - 1];
+        return last.tables
+          .filter(t => t.result)
+          .map(t => t.result.placement[0])
+          .filter(i => i !== undefined);
+      })();
+  const tables = [];
+  for (let i = 0; i < eligible.length; i += 4) {
+    tables.push({ playerIndices: eligible.slice(i, Math.min(i+4, eligible.length)), result: null });
+  }
+  return tables;
+}
+
+function generateNextTournamentRound() {
+  const tables = TOURNAMENT.format === 'swiss'
+    ? generateSwissPods(TOURNAMENT.players)
+    : generateEliminationPods(TOURNAMENT.players, TOURNAMENT.rounds);
+  TOURNAMENT.rounds.push(tables);
+}
+
+function launchTournament() {
+  const format    = document.getElementById('tourn-format-sel').value;
+  const numRounds = parseInt(document.getElementById('tourn-rounds-sel').value, 10);
+
+  // Build player list from current setup inputs
+  const players = [];
+  for (let i = 0; i < G.setupCount; i++) {
+    const name  = (document.getElementById(`n-${i}`)?.value || '').trim() || `Player ${i+1}`;
+    const color = document.getElementById(`c-${i}`)?.value || PALETTE[i];
+    players.push({ name, color, points: 0, wins: 0, losses: 0, prevOpponents: [] });
+  }
+
+  TOURNAMENT = createTournament(players, format, numRounds);
+  TOURNAMENT.started = true;
+  generateNextTournamentRound();
+  showScreen('tournament');
+  renderTournamentScreen();
+}
+
+function startTournamentPod(roundIdx, tableIdx) {
+  const table  = TOURNAMENT.rounds[roundIdx][tableIdx];
+  TOURNAMENT.activePod = { roundIdx, tableIdx };
+
+  const podPlayers = table.playerIndices.map(i => TOURNAMENT.players[i]);
+
+  G = createInitialState();
+  G.setupCount = podPlayers.length;
+  G.setupLife  = 40;
+  G.inTournament = true;
+  G.players = podPlayers.map(p => ({
+    name: p.name, color: p.color,
+    life: 40, poison: 0, cdr: {}, timer: 0,
+    eliminated: false, elimRound: null, elimCause: '',
+    _commanderName: '', artUrl: null,
+  }));
+  G.players.forEach((p,i) => G.players.forEach((_,j) => { if(i!==j) p.cdr[j]=0; }));
+
+  snapshotHistory();
+  renderGame();
+  showScreen('game');
+  startTick();
+}
+
+function recordTournamentPodResult() {
+  if (!TOURNAMENT?.activePod) return;
+  const { roundIdx, tableIdx } = TOURNAMENT.activePod;
+  const table = TOURNAMENT.rounds[roundIdx][tableIdx];
+
+  const sorted = [...G.players].sort((a,b) => {
+    if (!a.eliminated && b.eliminated) return -1;
+    if (a.eliminated && !b.eliminated) return  1;
+    if (a.eliminated && b.eliminated)  return (b.elimRound||0)-(a.elimRound||0);
+    return b.life - a.life;
+  });
+
+  const placement = sorted.map(sp => {
+    return table.playerIndices.find(i => TOURNAMENT.players[i].name === sp.name);
+  }).filter(i => i !== undefined);
+
+  table.result = { placement };
+
+  placement.forEach((pIdx, rank) => {
+    if (pIdx === undefined) return;
+    const tp = TOURNAMENT.players[pIdx];
+    if (rank === 0) { tp.wins++; tp.points += 3; }
+    else { tp.losses++; if (rank === 1) tp.points += 1; }
+  });
+
+  TOURNAMENT.activePod = null;
+}
+
+function renderTournamentScreen() {
+  if (!TOURNAMENT?.started) {
+    // Show setup UI only
+    document.getElementById('tourn-setup-card').style.display = '';
+    document.getElementById('tourn-start-actions').style.display = 'flex';
+    document.getElementById('tourn-standings-label').style.display = 'none';
+    document.getElementById('tourn-standings-wrap').style.display = 'none';
+    document.getElementById('tourn-pairings-label').style.display = 'none';
+    document.getElementById('tourn-pairings').innerHTML = '';
+    document.getElementById('tourn-actions').innerHTML = '';
+    document.getElementById('tourn-rounds-label').style.display =
+      document.getElementById('tourn-format-sel').value === 'elimination' ? 'none' : '';
+    document.getElementById('tourn-rounds-sel').style.display =
+      document.getElementById('tourn-format-sel').value === 'elimination' ? 'none' : '';
+    return;
+  }
+
+  document.getElementById('tourn-setup-card').style.display = 'none';
+  document.getElementById('tourn-start-actions').style.display = 'none';
+  document.getElementById('tourn-standings-label').style.display = '';
+  document.getElementById('tourn-standings-wrap').style.display = '';
+  document.getElementById('tourn-pairings-label').style.display = '';
+
+  // Update round label
+  const maxR = TOURNAMENT.format === 'swiss' ? TOURNAMENT.numRounds : '?';
+  document.getElementById('tourn-round-label').textContent =
+    `Round ${TOURNAMENT.currentRound}${TOURNAMENT.format==='swiss'?' of '+maxR:''}`;
+
+  // Standings
+  const standSorted = [...TOURNAMENT.players]
+    .map((p,i)=>({...p,_i:i}))
+    .sort((a,b) => b.points-a.points || b.wins-a.wins);
+  document.getElementById('tourn-standings-body').innerHTML = standSorted.map((p,rank) => `
+    <tr>
+      <td>${rank+1}</td>
+      <td><span class="dot" style="background:${p.color}"></span>${p.name}</td>
+      <td style="color:var(--teal)">${p.wins}</td>
+      <td style="color:var(--accent)">${p.losses}</td>
+      <td style="color:var(--gold);font-weight:700">${p.points}</td>
+    </tr>`).join('');
+
+  // Pairings
+  const roundIdx  = TOURNAMENT.currentRound - 1;
+  const tables    = TOURNAMENT.rounds[roundIdx] || [];
+  const allDone   = tables.every(t => t.result);
+  const pairingsEl = document.getElementById('tourn-pairings');
+  pairingsEl.innerHTML = tables.map((table, tIdx) => {
+    const players = table.playerIndices.map(i => TOURNAMENT.players[i]);
+    const done    = !!table.result;
+    const winnerName = done
+      ? (TOURNAMENT.players[table.result.placement[0]]?.name || '')
+      : '';
+    const winnerColor = done
+      ? (TOURNAMENT.players[table.result.placement[0]]?.color || '')
+      : '';
+    return `
+      <div class="pod-card${done?' pod-done':''}">
+        <div class="pod-header">Table ${tIdx+1}${done?' ✅':''}</div>
+        <div class="pod-players">
+          ${players.map(p=>`<span style="color:${p.color}">${p.name}</span>`).join('<span class="pod-vs">vs</span>')}
+        </div>
+        ${!done ? `<button class="pod-start-btn" onclick="startTournamentPod(${roundIdx},${tIdx})" aria-label="Start match at table ${tIdx+1}">▶ Start Match</button>` : ''}
+        ${done  ? `<div class="pod-winner-note">Winner: <strong style="color:${winnerColor}">${winnerName}</strong></div>` : ''}
+      </div>`;
+  }).join('');
+
+  // Actions
+  const actEl = document.getElementById('tourn-actions');
+  if (allDone && tables.length > 0) {
+    const isFinalRound = (TOURNAMENT.format === 'swiss' && TOURNAMENT.currentRound >= TOURNAMENT.numRounds)
+      || (TOURNAMENT.format === 'elimination' && tables.filter(t=>t.result).flatMap(t=>t.result.placement).filter((_,i)=>i===0).length <= 1);
+
+    if (isFinalRound) {
+      const champ = standSorted[0];
+      actEl.innerHTML = `
+        <div style="color:var(--gold);font-size:1.15rem;font-weight:800;text-align:center">🏆 Tournament Complete!</div>
+        <div style="color:var(--text);text-align:center;margin-top:.4rem">Champion: <strong style="color:${champ.color}">${champ.name}</strong> (${champ.points} pts)</div>
+        <button class="start-btn" style="max-width:300px;margin-top:.75rem" id="tourn-end-btn" aria-label="End tournament and return to setup">Return to Setup</button>`;
+      document.getElementById('tourn-end-btn').addEventListener('click', () => {
+        TOURNAMENT = null;
+        G = createInitialState();
+        showScreen('setup');
+        initSetup();
+      });
+    } else {
+      actEl.innerHTML = `<button class="start-btn" style="max-width:300px" id="tourn-nextrnd-btn" aria-label="Generate next round">Next Round →</button>`;
+      document.getElementById('tourn-nextrnd-btn').addEventListener('click', () => {
+        TOURNAMENT.currentRound++;
+        generateNextTournamentRound();
+        renderTournamentScreen();
+        sfxRound();
+        ariaAnnounce(`Round ${TOURNAMENT.currentRound} pairings generated.`);
+      });
+    }
+  } else {
+    actEl.innerHTML = '';
+  }
+}
+
+/* ============================================================
+   KEYBOARD SHORTCUTS (game screen)
+   ============================================================ */
+function handleGameKeys(e) {
+  if (document.getElementById('game-screen').classList.contains('hidden')) return;
+  // Don't intercept if focus is in an input
+  if (['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName)) return;
+  const modOpen = !document.getElementById('cdr-modal').classList.contains('hidden')
+    || !document.getElementById('poison-modal').classList.contains('hidden')
+    || !document.getElementById('amount-modal').classList.contains('hidden')
+    || !document.getElementById('menu-modal').classList.contains('hidden');
+  if (e.key === 'Escape') {
+    closeCdrModal(); closePoisonModal(); closeAmountModal(); closeMenu();
+    return;
+  }
+  if (modOpen) return;
+  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); nextTurn(); }
+  if (e.key === 'r' || e.key === 'R') { e.preventDefault(); endRound(); }
+  if (e.key === 'm' || e.key === 'M') { e.preventDefault(); openMenu(); }
+}
 
 /* ============================================================
    STATE
@@ -904,12 +1610,15 @@ function buildPlayerConfigs() {
     const name  = DEFAULT_NAMES[i];
     const row = document.createElement('div');
     row.className = 'pcfg-row';
+    row.setAttribute('role', 'group');
+    row.setAttribute('aria-label', `Player ${i+1} settings`);
     row.innerHTML = `
-      <span class="pcfg-num">${i + 1}</span>
-      <div class="color-wrap">
-        <input type="color" id="c-${i}" value="${color}" title="Pick colour">
+      <span class="pcfg-num" aria-hidden="true">${i + 1}</span>
+      <div class="color-wrap" title="Pick colour">
+        <input type="color" id="c-${i}" value="${color}" aria-label="Player ${i+1} colour">
       </div>
-      <input type="text" class="name-input" id="n-${i}" value="${name}" placeholder="Player ${i+1}" maxlength="18">
+      <input type="text" class="name-input" id="n-${i}" value="${name}" placeholder="Player ${i+1}" maxlength="18" aria-label="Player ${i+1} name">
+      <input type="text" class="commander-input" id="cmd-${i}" placeholder="Commander (optional)" maxlength="40" aria-label="Player ${i+1} commander name for card art">
     `;
     el.appendChild(row);
   }
@@ -921,6 +1630,7 @@ function startGame() {
   for (let i = 0; i < G.setupCount; i++) {
     const name  = (document.getElementById(`n-${i}`).value || '').trim() || `Player ${i+1}`;
     const color = document.getElementById(`c-${i}`).value;
+    const commander = (document.getElementById(`cmd-${i}`)?.value || '').trim();
     G.players.push({
       name, color,
       life: G.setupLife,
@@ -930,6 +1640,8 @@ function startGame() {
       eliminated: false,
       elimRound: null,
       elimCause: '',
+      _commanderName: commander,
+      artUrl: null,
     });
   }
 
@@ -951,6 +1663,12 @@ function startGame() {
   renderGame();
   showScreen('game');
   startTick();
+  startAmbient();
+
+  // Fetch Scryfall art in background, re-render cards when done
+  loadCommanderArts().then(() => {
+    if (!G.over) renderGrid();
+  }).catch(() => {});
 }
 
 /* ============================================================
@@ -995,11 +1713,17 @@ function buildCard(p, idx) {
   const card = document.createElement('div');
   card.id = `card-${idx}`;
   card.className = cardClass(idx);
+  card.setAttribute('role', 'region');
+  card.setAttribute('aria-label', `${p.name}: ${p.life} life`);
 
-  // coloured radial bg
+  // coloured radial bg or Scryfall art
   const bg = document.createElement('div');
   bg.className = 'p-bg';
-  bg.style.background = `radial-gradient(ellipse at 60% 40%, ${p.color} 0%, transparent 68%)`;
+  if (p.artUrl) {
+    bg.style.cssText = `background:url('${p.artUrl}') center/cover no-repeat; opacity:.22;`;
+  } else {
+    bg.style.background = `radial-gradient(ellipse at 60% 40%, ${p.color} 0%, transparent 68%)`;
+  }
   card.appendChild(bg);
 
   // name
@@ -1033,8 +1757,12 @@ function buildCard(p, idx) {
   pb.id = `pb-${idx}`;
   pb.className = 'badge' + (p.poison >= 7 ? ' warn-poison' : '');
   pb.title = 'Poison counters';
-  pb.innerHTML = `<span class="badge-icon">☠️</span><span id="pv-${idx}">${p.poison}</span>`;
+  pb.setAttribute('role', 'button');
+  pb.setAttribute('aria-label', `${p.name} poison: ${p.poison}`);
+  pb.setAttribute('tabindex', '0');
+  pb.innerHTML = `<span class="badge-icon" aria-hidden="true">☠️</span><span id="pv-${idx}">${p.poison}</span>`;
   pb.addEventListener('click', e => { e.stopPropagation(); openPoisonModal(idx); });
+  pb.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); openPoisonModal(idx); } });
   cr.appendChild(pb);
 
   const maxCdr = calcMaxCdr(idx);
@@ -1042,8 +1770,12 @@ function buildCard(p, idx) {
   cb.id = `cb-${idx}`;
   cb.className = 'badge' + (maxCdr >= 15 ? ' warn-cdr' : '');
   cb.title = 'Commander damage';
-  cb.innerHTML = `<span class="badge-icon">⚔️</span><span id="cv-${idx}">${maxCdr}</span>`;
+  cb.setAttribute('role', 'button');
+  cb.setAttribute('aria-label', `${p.name} commander damage: ${maxCdr}`);
+  cb.setAttribute('tabindex', '0');
+  cb.innerHTML = `<span class="badge-icon" aria-hidden="true">⚔️</span><span id="cv-${idx}">${maxCdr}</span>`;
   cb.addEventListener('click', e => { e.stopPropagation(); openCdrModal(idx); });
+  cb.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); openCdrModal(idx); } });
   cr.appendChild(cb);
   card.appendChild(cr);
 
@@ -1087,6 +1819,7 @@ function makeLifeBtn(sym, idx, delta) {
   const btn = document.createElement('button');
   btn.className = 'life-btn';
   btn.textContent = sym;
+  btn.setAttribute('aria-label', `${delta > 0 ? 'Increase' : 'Decrease'} life for player ${idx+1}`);
 
   let holdT = null, holdI = null;
 
@@ -1131,6 +1864,8 @@ function applyLifeDelta(idx, delta) {
   showLifeAnim(idx, delta);
   refreshCard(idx);
   checkElim(idx);
+  if (delta < 0) sfxDamage(); else sfxHeal();
+  ariaAnnounce(`${p.name}: ${p.life} life.`);
 }
 
 function setLife(idx, val) {
@@ -1221,6 +1956,8 @@ function checkElim(idx) {
     p.elimRound   = G.round;
     p.elimCause   = cause;
     refreshCard(idx);
+    sfxDeath();
+    ariaAnnounce(`${p.name} eliminated! Cause: ${cause}`);
     checkWinner();
   }
 }
@@ -1250,7 +1987,9 @@ function nextTurn() {
   if (tries >= n) { checkWinner(); return; }
   G.curIdx = next;
   G.timers.turn = 0;
+  sfxTurn();
   updateTurnBar();
+  ariaAnnounce(`${G.players[G.curIdx].name}'s turn.`);
   G.players.forEach((_, i) => {
     const c = document.getElementById(`card-${i}`);
     if (c) c.className = cardClass(i);
@@ -1263,6 +2002,8 @@ function endRound() {
   G.round++;
   G.timers.round = 0;
   G.timers.turn  = 0;
+  sfxRound();
+  ariaAnnounce(`Round ${G.round} started.`);
   // Reset to first alive player
   const first = G.players.findIndex(p => !p.eliminated);
   if (first === -1) { checkWinner(); return; }
@@ -1471,7 +2212,18 @@ function closeMenu() {
 function triggerEndGame() {
   G.over = true;
   stopTick();
+  stopAmbient();
   snapshotHistory();
+  sfxWin();
+  saveGameRecord();
+
+  if (G.inTournament) {
+    recordTournamentPodResult();
+    showScreen('tournament');
+    renderTournamentScreen();
+    return;
+  }
+
   showScreen('end');
   renderEndScreen();
 }
@@ -1517,12 +2269,6 @@ function renderEndScreen() {
     `Total time: <strong>${fmtTime(G.timers.total)}</strong> &nbsp;|&nbsp;
      ${G.round} rounds &nbsp;|&nbsp;
      ${G.players.length} players`;
-
-  // Future ideas
-  const fl = document.getElementById('future-list');
-  fl.innerHTML = FUTURE_IDEAS.map(f =>
-    `<li><span class="future-n">${f.n}.</span><span>${f.t}</span></li>`
-  ).join('');
 
   // Chart
   drawChart();
@@ -1688,6 +2434,7 @@ function drawChart() {
    ============================================================ */
 function playAgain() {
   stopTick();
+  stopAmbient();
   const savedCount = G.setupCount;
   const savedLife  = G.setupLife;
   G = createInitialState();
@@ -1730,8 +2477,39 @@ window.addEventListener('resize', () => {
    EVENT WIRING
    ============================================================ */
 document.addEventListener('DOMContentLoaded', () => {
+  // Restore preferences
+  try {
+    if (localStorage.getItem('idtapthat_sound') === '0') {
+      soundEnabled = false;
+      document.querySelectorAll('.sound-toggle-btn').forEach(b => {
+        b.textContent = '🔇';
+        b.setAttribute('aria-label', 'Sound off (click to unmute)');
+      });
+    }
+    if (localStorage.getItem('idtapthat_hc') === '1') {
+      highContrastMode = true;
+      document.documentElement.classList.add('hc-mode');
+      document.querySelectorAll('.hc-toggle-btn').forEach(b => b.setAttribute('aria-pressed','true'));
+    }
+  } catch(e) {}
+
   // Setup
   document.getElementById('start-btn').addEventListener('click', startGame);
+  document.getElementById('tournament-btn').addEventListener('click', () => {
+    showScreen('tournament');
+    renderTournamentScreen();
+  });
+
+  // Sound & high-contrast toggles (all screens)
+  document.querySelectorAll('.sound-toggle-btn').forEach(b => b.addEventListener('click', toggleSound));
+  document.querySelectorAll('.hc-toggle-btn').forEach(b => b.addEventListener('click', toggleHighContrast));
+
+  // Tournament screen
+  document.getElementById('tourn-launch-btn').addEventListener('click', launchTournament);
+  document.getElementById('tourn-back-btn').addEventListener('click', () => {
+    showScreen('setup'); initSetup();
+  });
+  document.getElementById('tourn-format-sel').addEventListener('change', renderTournamentScreen);
 
   // Game controls
   document.getElementById('btn-next').addEventListener('click', nextTurn);
@@ -1793,10 +2571,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // End screen
   document.getElementById('play-again-btn').addEventListener('click', playAgain);
+  document.getElementById('career-btn').addEventListener('click', openCareerModal);
+
+  // Career modal
+  document.getElementById('career-close').addEventListener('click', closeCareerModal);
+  document.getElementById('career-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('career-modal')) closeCareerModal();
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', handleGameKeys);
 
   // Init
   initSetup();
 });
+
+/* ============================================================
+   SERVICE WORKER REGISTRATION
+   ============================================================ */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
 </script>
 </body>
 </html>
