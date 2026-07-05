@@ -1020,6 +1020,17 @@ input  { font-family: inherit; color: var(--text); }
         <option value="swiss">Swiss Rounds</option>
         <option value="elimination">Single Elimination</option>
       </select>
+      <label for="tourn-podsize-sel">Pod Size:</label>
+      <select id="tourn-podsize-sel" class="tourn-select" aria-label="Pod size">
+        <option value="4">1v1v1v1 (Commander)</option>
+        <option value="2">1v1 (Duel)</option>
+      </select>
+      <label for="tourn-life-sel">Starting Life:</label>
+      <select id="tourn-life-sel" class="tourn-select" aria-label="Starting life total">
+        <option value="40">40</option>
+        <option value="20">20</option>
+        <option value="30">30</option>
+      </select>
       <label for="tourn-rounds-sel" id="tourn-rounds-label">Rounds:</label>
       <select id="tourn-rounds-sel" class="tourn-select" aria-label="Number of rounds">
         <option value="3">3</option>
@@ -1085,7 +1096,33 @@ const CAREER_KEY = 'idtapthat_career';
    ============================================================ */
 let audioCtx = null;
 let soundEnabled = true;
-let ambientNodes = null;
+let ytPlayer = null;
+let ytReady = false;
+
+// Called automatically by YouTube IFrame API when it loads
+function onYouTubeIframeAPIReady() {
+  ytPlayer = new YT.Player('yt-player', {
+    videoId: 'ayqJPTsXQq4',
+    playerVars: {
+      autoplay: 0,
+      loop: 1,
+      playlist: 'ayqJPTsXQq4',
+      controls: 0,
+      disablekb: 1,
+      fs: 0,
+      modestbranding: 1,
+      rel: 0,
+    },
+    events: {
+      onReady: () => {
+        ytReady = true;
+        try { ytPlayer.setVolume(40); } catch(e) {}
+        if (soundEnabled) { try { ytPlayer.playVideo(); } catch(e) {} }
+      },
+      onError: () => {},
+    },
+  });
+}
 
 function getAudio() {
   if (!audioCtx) {
@@ -1094,7 +1131,6 @@ function getAudio() {
   if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
   return audioCtx;
 }
-
 function playTone(freq, type, duration, gainVal, freqEnd) {
   if (!soundEnabled) return;
   try {
@@ -1121,38 +1157,15 @@ function sfxWin()     { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTon
 
 function startAmbient() {
   if (!soundEnabled) return;
-  try {
-    const ctx = getAudio(); if (!ctx) return;
-    stopAmbient();
-    const master = ctx.createGain();
-    master.gain.setValueAtTime(0.035, ctx.currentTime);
-    master.connect(ctx.destination);
-    const oscs = [55, 82.41, 110].map((freq, i) => {
-      const osc = ctx.createOscillator(), g = ctx.createGain();
-      osc.connect(g); g.connect(master);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq * (1 + i * 0.0018), ctx.currentTime);
-      g.gain.setValueAtTime(0.33, ctx.currentTime);
-      osc.start();
-      return { osc, gain: g };
-    });
-    const lfo = ctx.createOscillator(), lfoG = ctx.createGain();
-    lfo.connect(lfoG); lfoG.connect(master.gain);
-    lfo.frequency.setValueAtTime(0.04, ctx.currentTime);
-    lfoG.gain.setValueAtTime(0.018, ctx.currentTime);
-    lfo.start();
-    ambientNodes = { oscs, lfo, master };
-  } catch(e) {}
+  if (ytReady && ytPlayer) {
+    try { ytPlayer.playVideo(); } catch(e) {}
+  }
 }
 
 function stopAmbient() {
-  if (!ambientNodes) return;
-  try {
-    ambientNodes.oscs.forEach(({osc}) => osc.stop());
-    ambientNodes.lfo.stop();
-    ambientNodes.master.disconnect();
-  } catch(e) {}
-  ambientNodes = null;
+  if (ytReady && ytPlayer) {
+    try { ytPlayer.pauseVideo(); } catch(e) {}
+  }
 }
 
 function toggleSound() {
@@ -1161,7 +1174,6 @@ function toggleSound() {
     startAmbient();
   } else {
     stopAmbient();
-    try { if (audioCtx) audioCtx.suspend(); } catch(e) {}
   }
   const label = soundEnabled ? 'Sound on (click to mute)' : 'Sound off (click to unmute)';
   const icon  = soundEnabled ? '🔊' : '🔇';
@@ -1301,9 +1313,9 @@ async function loadCommanderArts() {
    ============================================================ */
 let TOURNAMENT = null;
 
-function createTournament(players, format, numRounds) {
+function createTournament(players, format, numRounds, podSize, startingLife) {
   return {
-    format, numRounds,
+    format, numRounds, podSize: podSize || 4, startingLife: startingLife || 40,
     currentRound: 1,
     started: false,
     players: players.map(p => ({ ...p, points: 0, wins: 0, losses: 0, prevOpponents: [] })),
@@ -1313,18 +1325,20 @@ function createTournament(players, format, numRounds) {
 }
 
 function generateSwissPods(players) {
+  const podSize = TOURNAMENT.podSize || 4;
   const sorted = [...players.keys()].sort((a,b) => {
     const d = players[b].points - players[a].points;
     return d !== 0 ? d : (Math.random() - 0.5);
   });
   const tables = [];
-  for (let i = 0; i < sorted.length; i += 4) {
-    tables.push({ playerIndices: sorted.slice(i, Math.min(i+4, sorted.length)), result: null });
+  for (let i = 0; i < sorted.length; i += podSize) {
+    tables.push({ playerIndices: sorted.slice(i, Math.min(i+podSize, sorted.length)), result: null });
   }
   return tables;
 }
 
 function generateEliminationPods(players, prevRounds) {
+  const podSize = TOURNAMENT.podSize || 4;
   // First round: random; subsequent rounds: winners advance
   const eligible = prevRounds.length === 0
     ? [...players.keys()].sort(() => Math.random() - 0.5)
@@ -1337,8 +1351,8 @@ function generateEliminationPods(players, prevRounds) {
           .filter(i => i !== undefined);
       })();
   const tables = [];
-  for (let i = 0; i < eligible.length; i += 4) {
-    tables.push({ playerIndices: eligible.slice(i, Math.min(i+4, eligible.length)), result: null });
+  for (let i = 0; i < eligible.length; i += podSize) {
+    tables.push({ playerIndices: eligible.slice(i, Math.min(i+podSize, eligible.length)), result: null });
   }
   return tables;
 }
@@ -1353,6 +1367,8 @@ function generateNextTournamentRound() {
 function launchTournament() {
   const format    = document.getElementById('tourn-format-sel').value;
   const numRounds = parseInt(document.getElementById('tourn-rounds-sel').value, 10);
+  const podSize   = parseInt(document.getElementById('tourn-podsize-sel').value, 10);
+  const startingLife = parseInt(document.getElementById('tourn-life-sel').value, 10);
 
   // Build player list from current setup inputs
   const players = [];
@@ -1362,7 +1378,7 @@ function launchTournament() {
     players.push({ name, color, points: 0, wins: 0, losses: 0, prevOpponents: [] });
   }
 
-  TOURNAMENT = createTournament(players, format, numRounds);
+  TOURNAMENT = createTournament(players, format, numRounds, podSize, startingLife);
   TOURNAMENT.started = true;
   generateNextTournamentRound();
   showScreen('tournament');
@@ -1377,11 +1393,11 @@ function startTournamentPod(roundIdx, tableIdx) {
 
   G = createInitialState();
   G.setupCount = podPlayers.length;
-  G.setupLife  = 40;
+  G.setupLife  = TOURNAMENT.startingLife || 40;
   G.inTournament = true;
   G.players = podPlayers.map(p => ({
     name: p.name, color: p.color,
-    life: 40, poison: 0, cdr: {}, timer: 0,
+    life: TOURNAMENT.startingLife || 40, poison: 0, cdr: {}, timer: 0,
     eliminated: false, elimRound: null, elimCause: '',
     _commanderName: '', artUrl: null,
   }));
@@ -1431,10 +1447,16 @@ function renderTournamentScreen() {
     document.getElementById('tourn-pairings-label').style.display = 'none';
     document.getElementById('tourn-pairings').innerHTML = '';
     document.getElementById('tourn-actions').innerHTML = '';
-    document.getElementById('tourn-rounds-label').style.display =
-      document.getElementById('tourn-format-sel').value === 'elimination' ? 'none' : '';
-    document.getElementById('tourn-rounds-sel').style.display =
-      document.getElementById('tourn-format-sel').value === 'elimination' ? 'none' : '';
+    const isElim = document.getElementById('tourn-format-sel').value === 'elimination';
+    document.getElementById('tourn-rounds-label').style.display = isElim ? 'none' : '';
+    document.getElementById('tourn-rounds-sel').style.display  = isElim ? 'none' : '';
+    // Auto-set life total based on pod size
+    const podSel  = document.getElementById('tourn-podsize-sel');
+    const lifeSel = document.getElementById('tourn-life-sel');
+    if (podSel && lifeSel) {
+      const suggestedLife = podSel.value === '2' ? '20' : '40';
+      if (!lifeSel._userOverride) lifeSel.value = suggestedLife;
+    }
     return;
   }
 
@@ -2510,6 +2532,16 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen('setup'); initSetup();
   });
   document.getElementById('tourn-format-sel').addEventListener('change', renderTournamentScreen);
+  document.getElementById('tourn-podsize-sel').addEventListener('change', () => {
+    // Reset user-override flag so auto-suggest kicks in on pod size change
+    const lifeSel = document.getElementById('tourn-life-sel');
+    if (lifeSel) lifeSel._userOverride = false;
+    renderTournamentScreen();
+  });
+  document.getElementById('tourn-life-sel').addEventListener('change', () => {
+    const lifeSel = document.getElementById('tourn-life-sel');
+    if (lifeSel) lifeSel._userOverride = true;
+  });
 
   // Game controls
   document.getElementById('btn-next').addEventListener('click', nextTurn);
@@ -2595,5 +2627,9 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+<!-- YouTube IFrame API for background music -->
+<div id="yt-player" style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px" aria-hidden="true"></div>
+<script src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
