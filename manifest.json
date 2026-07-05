@@ -1,0 +1,20 @@
+{
+  "name": "I'd Tap That – MTG Life Calculator",
+  "short_name": "I'd Tap That",
+  "description": "Magic: The Gathering life tracker with tournament mode, match history, and more.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0b0b14",
+  "theme_color": "#0b0b14",
+  "categories": ["games", "utilities"],
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='28' fill='%230b0b14'/><text x='50%25' y='58%25' dominant-baseline='middle' text-anchor='middle' font-size='110' font-family='sans-serif'>⚡</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
