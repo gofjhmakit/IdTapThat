@@ -1652,6 +1652,7 @@ function startGame() {
       eliminated: false,
       elimRound: null,
       elimCause: '',
+      elimTime:  null,
       _commanderName: commander,
       artUrl: null,
     });
@@ -1881,6 +1882,7 @@ function applyLifeDelta(idx, delta) {
   lifeUndoStack.push({idx, prevLife: p.life});
   if (lifeUndoStack.length > 50) lifeUndoStack.shift();
   p.life += delta;
+  snapshotHistory();
   showLifeAnim(idx, delta);
   refreshCard(idx);
   checkElim(idx);
@@ -1894,6 +1896,7 @@ function setLife(idx, val) {
   lifeUndoStack.push({idx, prevLife: old});
   if (lifeUndoStack.length > 50) lifeUndoStack.shift();
   G.players[idx].life = val;
+  snapshotHistory();
   showLifeAnim(idx, val - old);
   refreshCard(idx);
   checkElim(idx);
@@ -2010,6 +2013,7 @@ function confirmElim() {
   p.eliminated = true;
   p.elimRound  = G.round;
   p.elimCause  = cause;
+  p.elimTime   = G.timers.total;
   refreshCard(idx);
   sfxDeath();
   ariaAnnounce(`${p.name} eliminated! Cause: ${cause}`);
@@ -2043,6 +2047,7 @@ function revivePlayer(idx) {
   p.eliminated = false;
   p.elimRound  = null;
   p.elimCause  = '';
+  p.elimTime   = null;
   if (p.life <= 0) p.life = 1;
   refreshCard(idx);
   ariaAnnounce(`${p.name} revived with ${p.life} life.`);
@@ -2096,7 +2101,6 @@ function nextTurn() {
 
 function endRound() {
   if (G.over) return;
-  snapshotHistory();
   G.round++;
   G.timers.round = 0;
   G.timers.turn  = 0;
@@ -2115,7 +2119,14 @@ function endRound() {
 }
 
 function snapshotHistory() {
-  G.history.push({ round: G.round, lives: G.players.map(p => p.life) });
+  const t = G.timers.total;
+  const lives = G.players.map(p => p.life);
+  const last = G.history[G.history.length - 1];
+  if (last && last.time === t) {
+    last.lives = lives; // same second — update in place
+  } else {
+    G.history.push({ time: t, lives });
+  }
 }
 
 function updateTopBar() {
@@ -2378,7 +2389,6 @@ function drawChart() {
   const canvas = document.getElementById('chart-canvas');
   const hist   = G.history;
 
-  // Size canvas to container
   const wrap = canvas.parentElement;
   canvas.width  = wrap.clientWidth  - 24;
   canvas.height = Math.max(220, Math.min(canvas.width * 0.52, 380));
@@ -2397,23 +2407,26 @@ function drawChart() {
     ctx.fillStyle = '#555';
     ctx.font = '14px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('Not enough data – end at least one round for a chart.', W/2, H/2);
+    ctx.fillText('No life changes recorded yet.', W/2, H/2);
     return;
   }
 
   const allLives = hist.flatMap(h => h.lives);
-  const minL = Math.min(0, Math.min(...allLives)) - 3;
-  const maxL = Math.max(...allLives) + Math.ceil(G.setupLife * 0.08);
+  const minL  = Math.min(0, Math.min(...allLives)) - 2;
+  const maxL  = Math.max(...allLives) + Math.ceil(G.setupLife * 0.08);
+  const tMin  = hist[0].time;
+  const tMax  = hist[hist.length - 1].time;
+  const tSpan = Math.max(1, tMax - tMin);
 
-  const toX = i   => PAD.left + (i / (hist.length - 1)) * PW;
+  const toX = t   => PAD.left + ((t - tMin) / tSpan) * PW;
   const toY = val => PAD.top  + (1 - (val - minL) / (maxL - minL)) * PH;
 
-  // --- grid lines & y-axis labels ---
-  const GRID_LINES = 5;
+  // --- y-axis grid & labels ---
+  const GRID_Y = 5;
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'right';
-  for (let g = 0; g <= GRID_LINES; g++) {
-    const ratio = g / GRID_LINES;
+  for (let g = 0; g <= GRID_Y; g++) {
+    const ratio = g / GRID_Y;
     const val   = Math.round(maxL - ratio * (maxL - minL));
     const y     = PAD.top + ratio * PH;
     ctx.strokeStyle = 'rgba(255,255,255,0.055)';
@@ -2433,16 +2446,19 @@ function drawChart() {
     ctx.setLineDash([]);
   }
 
-  // --- x-axis labels ---
+  // --- x-axis time labels (6 evenly-spaced ticks) ---
+  const TICKS = Math.min(6, hist.length);
   ctx.textAlign = 'center';
   ctx.fillStyle = '#555';
-  hist.forEach((h, i) => {
-    const x = toX(i);
-    ctx.fillText(`R${h.round}`, x, H - PAD.bottom + 14);
+  ctx.font = '10px sans-serif';
+  for (let t = 0; t <= TICKS; t++) {
+    const sec = tMin + (t / TICKS) * tSpan;
+    const x   = toX(sec);
+    ctx.fillText(fmtTime(Math.round(sec)), x, H - PAD.bottom + 14);
     ctx.strokeStyle = 'rgba(255,255,255,.1)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x, PAD.top + PH); ctx.lineTo(x, PAD.top + PH + 4); ctx.stroke();
-  });
+  }
 
   // --- axes ---
   ctx.strokeStyle = '#363660';
@@ -2460,69 +2476,77 @@ function drawChart() {
   ctx.fillStyle = '#555';
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('Life Total', 0, 0);
+  ctx.fillText('Life', 0, 0);
   ctx.restore();
 
   // --- player lines ---
   G.players.forEach((player, pIdx) => {
-    const lives = hist.map(h => h.lives[pIdx]);
+    const pts = hist.map(h => ({ x: toX(h.time), y: toY(h.lives[pIdx]) }));
 
-    // Filled area
+    // Find elimination point index (closest history entry to elimTime)
+    let elimIdx = -1;
+    if (player.eliminated && player.elimTime != null) {
+      elimIdx = hist.reduce((best, h, i) =>
+        Math.abs(h.time - player.elimTime) < Math.abs(hist[best].time - player.elimTime) ? i : best
+      , 0);
+    }
+
+    // Filled area under line
     ctx.beginPath();
-    ctx.moveTo(toX(0), toY(Math.max(minL, lives[0])));
-    lives.forEach((v, i) => ctx.lineTo(toX(i), toY(v)));
-    ctx.lineTo(toX(lives.length - 1), toY(minL));
-    ctx.lineTo(toX(0), toY(minL));
+    ctx.moveTo(pts[0].x, toY(minL));
+    pts.forEach(p => ctx.lineTo(p.x, p.y));
+    ctx.lineTo(pts[pts.length - 1].x, toY(minL));
     ctx.closePath();
-    ctx.fillStyle = player.color + '18';
+    ctx.fillStyle = player.color + '16';
     ctx.fill();
 
-    // Line
+    // Step line (life changes are discrete events)
     ctx.beginPath();
-    ctx.moveTo(toX(0), toY(lives[0]));
-    lives.forEach((v, i) => { if (i > 0) ctx.lineTo(toX(i), toY(v)); });
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) {
+      ctx.lineTo(pts[i].x, pts[i - 1].y); // horizontal step
+      ctx.lineTo(pts[i].x, pts[i].y);     // vertical drop/rise
+    }
     ctx.strokeStyle = player.color;
     ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
     ctx.stroke();
 
-    // Points
-    lives.forEach((v, i) => {
-      const x = toX(i), y = toY(v);
-      const isElim = player.eliminated && player.elimRound === hist[i].round;
+    // Event dots — only draw a dot where life actually changed
+    pts.forEach((p, i) => {
+      const lifeChanged = i === 0 || hist[i].lives[pIdx] !== hist[i - 1].lives[pIdx];
+      if (!lifeChanged) return;
+      const isElim = (i === elimIdx);
       ctx.beginPath();
-      ctx.arc(x, y, isElim ? 6 : 3.5, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, isElim ? 6 : 3, 0, Math.PI * 2);
       ctx.fillStyle = isElim ? '#ff3c3c' : player.color;
       ctx.fill();
       if (isElim) {
-        // Cross mark
         ctx.strokeStyle = '#fff';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(x-5,y-5); ctx.lineTo(x+5,y+5);
-        ctx.moveTo(x+5,y-5); ctx.lineTo(x-5,y+5);
+        ctx.moveTo(p.x-5, p.y-5); ctx.lineTo(p.x+5, p.y+5);
+        ctx.moveTo(p.x+5, p.y-5); ctx.lineTo(p.x-5, p.y+5);
         ctx.stroke();
-        // "☠" label
         ctx.fillStyle = '#ff3c3c';
         ctx.font = 'bold 9px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`☠ R${hist[i].round}`, x, y - 10);
+        ctx.fillText(`☠ ${fmtTime(player.elimTime)}`, p.x, p.y - 11);
       }
     });
   });
 
   // --- legend ---
-  const legendItems = G.players.filter((_, i) => i < 8);
   let lx = PAD.left;
   const ly = PAD.top - 10;
   ctx.font = 'bold 10px sans-serif';
   ctx.textAlign = 'left';
-  legendItems.forEach(player => {
+  G.players.slice(0, 8).forEach(player => {
     if (lx + 90 > W - PAD.right) return;
     ctx.fillStyle = player.color;
     ctx.fillRect(lx, ly - 6, 14, 3);
     ctx.fillText(player.name.substring(0, 9), lx + 18, ly);
-    lx += Math.min(90, Math.max(60, ctx.measureText(player.name.substring(0,9)).width + 26));
+    lx += Math.min(90, Math.max(60, ctx.measureText(player.name.substring(0, 9)).width + 26));
   });
 }
 
