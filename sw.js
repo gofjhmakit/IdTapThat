@@ -34,12 +34,6 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // YouTube IFrame API and media — always network, never cache
-  if (url.hostname.endsWith('youtube.com') || url.hostname.endsWith('ytimg.com') || url.hostname.endsWith('googlevideo.com')) {
-    event.respondWith(fetch(event.request).catch(() => new Response('', { status: 503 })));
-    return;
-  }
-
   // Cache-first for everything else
   event.respondWith(
     caches.match(event.request).then(cached => {
