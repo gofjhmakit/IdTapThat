@@ -3,7 +3,7 @@
    Caches all app assets for offline-first PWA support.
    ============================================================ */
 
-const CACHE_NAME = 'idtapthat-v1';
+const CACHE_NAME = 'idtapthat-v2';
 const PRECACHE   = ['/', '/index.html', '/manifest.json', '/sw.js'];
 
 /* Install: precache core assets */
@@ -30,6 +30,12 @@ self.addEventListener('fetch', event => {
 
   // Let Scryfall API calls go straight to network (card art, card data)
   if (url.hostname === 'api.scryfall.com' || url.hostname === 'cards.scryfall.io') {
+    event.respondWith(fetch(event.request).catch(() => new Response('', { status: 503 })));
+    return;
+  }
+
+  // YouTube IFrame API and media — always network, never cache
+  if (url.hostname.endsWith('youtube.com') || url.hostname.endsWith('ytimg.com') || url.hostname.endsWith('googlevideo.com')) {
     event.respondWith(fetch(event.request).catch(() => new Response('', { status: 503 })));
     return;
   }

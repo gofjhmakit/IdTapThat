@@ -1132,15 +1132,20 @@ let audioCtx = null;
 let soundEnabled = true;
 let ytPlayer = null;
 let ytReady = false;
+let wantAmbient = false; // true while a game is running
+
+// Embeddable fallback video IDs (synthwave radio → lofi → calm piano)
+const AMBIENT_IDS = ['4xDzrJKXOOY', 'hHW1oY26kxQ', 'DWcJFNfaw9c', 'XULUBg_ZcAU'];
+let ambientIdx = 0;
 
 // Called automatically by YouTube IFrame API when it loads
 function onYouTubeIframeAPIReady() {
   ytPlayer = new YT.Player('yt-player', {
-    videoId: 'ayqJPTsXQq4',
+    videoId: AMBIENT_IDS[0],
     playerVars: {
       autoplay: 0,
       loop: 1,
-      playlist: 'ayqJPTsXQq4',
+      playlist: AMBIENT_IDS[0],
       controls: 0,
       disablekb: 1,
       fs: 0,
@@ -1150,10 +1155,22 @@ function onYouTubeIframeAPIReady() {
     events: {
       onReady: () => {
         ytReady = true;
-        try { ytPlayer.setVolume(40); } catch(e) {}
-        if (soundEnabled) { try { ytPlayer.playVideo(); } catch(e) {} }
+        try { ytPlayer.setVolume(30); } catch(e) {}
+        // startGame() may have been called before the API finished loading
+        if (wantAmbient && soundEnabled) {
+          try { ytPlayer.playVideo(); } catch(e) {}
+        }
       },
-      onError: () => {},
+      onError: () => {
+        // Try next fallback ID
+        ambientIdx = (ambientIdx + 1) % AMBIENT_IDS.length;
+        try {
+          ytPlayer.loadVideoById({
+            videoId: AMBIENT_IDS[ambientIdx],
+            suggestedQuality: 'small',
+          });
+        } catch(e) {}
+      },
     },
   });
 }
@@ -1190,13 +1207,16 @@ function sfxTurn()    { playTone(880,'sine',.07,.09); }
 function sfxWin()     { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',.38,.22),i*110)); }
 
 function startAmbient() {
+  wantAmbient = true;
   if (!soundEnabled) return;
   if (ytReady && ytPlayer) {
     try { ytPlayer.playVideo(); } catch(e) {}
   }
+  // If ytReady is still false, onReady will check wantAmbient and start then
 }
 
 function stopAmbient() {
+  wantAmbient = false;
   if (ytReady && ytPlayer) {
     try { ytPlayer.pauseVideo(); } catch(e) {}
   }
