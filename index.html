@@ -913,6 +913,62 @@ input  { font-family: inherit; color: var(--text); }
 .tmm-swap-panel.open { display: flex; }
 
 /* ============================================================
+   CHAMPION CELEBRATION (confetti + modal)
+   ============================================================ */
+#confetti-layer {
+  position: fixed; inset: 0; z-index: 300;
+  pointer-events: none; overflow: hidden;
+}
+.confetti-piece {
+  position: absolute; top: -20px;
+  opacity: 0;
+  animation-name: confetti-fall;
+  animation-timing-function: cubic-bezier(.25,.46,.45,.94);
+  animation-fill-mode: forwards;
+}
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(112vh) translateX(var(--drift, 0px)) rotate(var(--spin, 480deg)); opacity: .9; }
+}
+
+.champion-modal-box {
+  max-width: 420px;
+  text-align: center;
+  background: radial-gradient(ellipse at 50% -10%, rgba(255,215,0,.14) 0%, var(--surface) 60%);
+  border: 2px solid var(--gold);
+  box-shadow: 0 0 60px rgba(255,215,0,.25), var(--shadow);
+  animation: champion-pop .45s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes champion-pop {
+  0%   { transform: scale(.75); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.champion-modal-trophy {
+  font-size: 3.2rem;
+  filter: drop-shadow(0 0 18px rgba(255,215,0,.6));
+  animation: champion-bounce 1.4s ease-in-out infinite;
+}
+@keyframes champion-bounce {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50%      { transform: translateY(-8px) rotate(4deg); }
+}
+.champion-modal-title {
+  margin-top: .4rem;
+  font-size: .78rem; font-weight: 800; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--gold);
+}
+.champion-modal-name {
+  margin-top: .3rem;
+  font-size: clamp(1.6rem, 6vw, 2.4rem); font-weight: 900;
+  text-shadow: 0 2px 18px rgba(0,0,0,.6);
+  word-break: break-word;
+}
+.champion-modal-sub {
+  margin-top: .4rem;
+  color: var(--muted); font-size: .92rem;
+}
+
+/* ============================================================
    PRINT SHEET
    ============================================================ */
 #print-sheet { display: none; }
@@ -1271,6 +1327,18 @@ input  { font-family: inherit; color: var(--text); }
 <!-- Print-only pairings sheet -->
 <div id="print-sheet"></div>
 
+<!-- Champion celebration -->
+<div id="confetti-layer" aria-hidden="true"></div>
+<div id="champion-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="champion-modal-name">
+  <div class="modal-box champion-modal-box">
+    <div class="champion-modal-trophy" aria-hidden="true">🏆</div>
+    <div class="champion-modal-title">Champion</div>
+    <div class="champion-modal-name" id="champion-modal-name"></div>
+    <div class="champion-modal-sub">Congratulations!</div>
+    <button class="start-btn" id="champion-modal-close" style="margin-top:1.25rem;max-width:220px" aria-label="Close celebration">🎉 Nice!</button>
+  </div>
+</div>
+
 <!-- ============================================================
      JAVASCRIPT
      ============================================================ -->
@@ -1338,6 +1406,12 @@ function sfxDeath()   { playTone(140,'sawtooth',.5,.28,55); setTimeout(()=>playT
 function sfxRound()   { [523,659,784].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',.28,.18),i*130)); }
 function sfxTurn()    { playTone(880,'sine',.07,.09); }
 function sfxWin()     { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',.38,.22),i*110)); }
+function sfxFanfare() {
+  // Short triumphant fanfare for the tournament champion celebration.
+  [[523.25,0],[659.25,90],[784.0,180],[1046.5,300],[784.0,480],[1046.5,620]]
+    .forEach(([freq,t]) => setTimeout(() => playTone(freq,'triangle',.35,.24), t));
+  setTimeout(() => playTone(1318.5,'triangle',.6,.26), 800);
+}
 
 function toggleSound() {
   soundEnabled = !soundEnabled;
@@ -1348,6 +1422,53 @@ function toggleSound() {
     b.setAttribute('aria-label', label);
   });
   try { localStorage.setItem('idtapthat_sound', soundEnabled ? '1' : '0'); } catch(e) {}
+}
+
+/* ============================================================
+   CHAMPION CELEBRATION (confetti + fanfare + modal)
+   ============================================================ */
+const CONFETTI_COLORS = ['#e94560','#4ecdc4','#ffd700','#a8e6cf','#ff8b94','#b388ff','#ff9f43','#69d2e7'];
+
+function spawnConfetti(count) {
+  const layer = document.getElementById('confetti-layer');
+  if (!layer) return;
+  for (let i = 0; i < (count || 140); i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    const color    = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    const left     = Math.random() * 100;
+    const duration = 2.4 + Math.random() * 2.0;
+    const delay    = Math.random() * 0.7;
+    const drift    = Math.round(Math.random() * 200 - 100);
+    const spin     = Math.round(360 + Math.random() * 540);
+    const w        = 6 + Math.random() * 6;
+    const h        = w * (1.2 + Math.random() * 0.8);
+    el.style.left = left + 'vw';
+    el.style.width = w + 'px';
+    el.style.height = h + 'px';
+    el.style.background = color;
+    el.style.borderRadius = Math.random() < 0.5 ? '50%' : '2px';
+    el.style.animationDuration = duration + 's';
+    el.style.animationDelay = delay + 's';
+    el.style.setProperty('--drift', drift + 'px');
+    el.style.setProperty('--spin', spin + 'deg');
+    layer.appendChild(el);
+    setTimeout(() => el.remove(), (duration + delay) * 1000 + 300);
+  }
+}
+
+function celebrateChampion(name, color) {
+  const nameEl = document.getElementById('champion-modal-name');
+  nameEl.textContent = name;
+  nameEl.style.color = color || 'var(--gold)';
+  document.getElementById('champion-modal').classList.remove('hidden');
+  spawnConfetti();
+  sfxFanfare();
+  ariaAnnounce(`Congratulations ${name}, tournament champion!`);
+}
+
+function closeChampionModal() {
+  document.getElementById('champion-modal').classList.add('hidden');
 }
 
 /* ============================================================
@@ -1817,7 +1938,11 @@ function renderTMM() {
       actEl.innerHTML = `
         <div style="color:var(--gold);font-size:1.15rem;font-weight:800;text-align:center">🏆 Tournament Complete!</div>
         <div style="color:var(--text);text-align:center;margin-top:.4rem">Champion: <strong style="color:${champ.color}">${escapeHtml(champ.name)}</strong> (${champ.points} pts)</div>
-        <button class="start-btn" style="max-width:300px;margin-top:.75rem" id="tourn-end-btn" aria-label="End tournament and return to mode select">Finish & Return to Mode Select</button>`;
+        <button class="start-btn" style="max-width:300px;margin-top:.75rem;background:linear-gradient(90deg,var(--gold),#ff6b35);box-shadow:0 4px 20px rgba(255,215,0,.4);color:#1a1200" id="tourn-congrats-btn" aria-label="Celebrate the champion">🎉 Congratulations</button>
+        <button class="start-btn" style="max-width:300px;margin-top:.6rem;background:rgba(255,255,255,.06);border:1px solid var(--border);box-shadow:none;color:var(--muted)" id="tourn-end-btn" aria-label="End tournament and return to mode select">Finish & Return to Mode Select</button>`;
+      document.getElementById('tourn-congrats-btn').addEventListener('click', () => {
+        celebrateChampion(champ.name, champ.color);
+      });
       document.getElementById('tourn-end-btn').addEventListener('click', () => {
         clearTournamentState();
         showScreen('mode');
@@ -3029,6 +3154,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('career-close').addEventListener('click', closeCareerModal);
   document.getElementById('career-modal').addEventListener('click', e => {
     if (e.target === document.getElementById('career-modal')) closeCareerModal();
+  });
+
+  // Champion celebration modal
+  document.getElementById('champion-modal-close').addEventListener('click', closeChampionModal);
+  document.getElementById('champion-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('champion-modal')) closeChampionModal();
   });
 
   // Keyboard shortcuts
