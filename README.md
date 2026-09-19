@@ -2,6 +2,8 @@
 
 A Magic: The Gathering life tracker with commander damage, poison counters, timers, match history, tournament mode, Scryfall card-art backgrounds, sound design, and full accessibility support. Installable as an offline PWA on any device.
 
+Also functions as Tournament tool (1v1 or 1v1v1v1).
+
 You can test and use it [here](https://gofjhmakit.github.io/IdTapThat/).
 
 ## Features
