@@ -1,0 +1,339 @@
+/* ============================================================
+   I'd Tap That — colour themes
+   One block per theme: :root[data-theme="<id>"] { ...tokens }
+   Every block defines the full token contract. Flourishes follow
+   the token blocks at the bottom of the file.
+   ============================================================ */
+
+/* ---------- Default (current app look) ---------- */
+:root[data-theme="default"] {
+  --bg: #0b0b14;
+  --surface: #13132a;
+  --surface2: #1a1a2e;
+  --accent: #e94560;
+  --accent-rgb: 233,69,96;
+  --accent-hover: #c73352;
+  --accent2: #0f3460;
+  --accent-end: #ff6b35;
+  --gold: #ffd700;
+  --gold-rgb: 255,215,0;
+  --teal: #4ecdc4;
+  --teal-rgb: 78,205,196;
+  --text: #eaeaea;
+  --muted: #777;
+  --border: #2a2a44;
+  --border-hover: #4a4a80;
+  --on-accent: #fff;
+  --tint-rgb: 255,255,255;
+  --scrim-rgb: 0,0,0;
+  --bg-glow: #1a0a30;
+  --bg-image: none;
+  --logo-grad: linear-gradient(100deg, #e94560 20%, #ffd700 80%);
+  --logo-glow: rgba(233,69,96,.35);
+  --font-display: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --radius: 14px;
+  --meta-color: #0b0b14;
+}
+
+/* ---------- Fantasy: elder kingdoms, parchment and gold leaf ---------- */
+:root[data-theme="fantasy"] {
+  --bg: #0e1810;
+  --surface: #162318;
+  --surface2: #1d2d1f;
+  --accent: #d4a838;
+  --accent-rgb: 212,168,56;
+  --accent-hover: #e6bf5a;
+  --accent2: #26386e;
+  --accent-end: #f0d585;
+  --gold: #f2d27a;
+  --gold-rgb: 242,210,122;
+  --teal: #7fcfa3;
+  --teal-rgb: 127,207,163;
+  --text: #efe6cf;
+  --muted: #b3a787;
+  --border: #364631;
+  --border-hover: #8a7a3e;
+  --on-accent: #1c1405;
+  --tint-rgb: 255,248,225;
+  --scrim-rgb: 6,12,7;
+  --bg-glow: #263a20;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M24 4l20 20-20 20L4 24z' fill='none' stroke='%23d4a838' stroke-opacity='.06'/%3E%3Ccircle cx='24' cy='24' r='2' fill='%23d4a838' fill-opacity='.07'/%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #b8892a 10%, #f6dc8c 48%, #fff4cf 55%, #c99a35 90%);
+  --logo-glow: rgba(212,168,56,.35);
+  --font-display: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --radius: 10px;
+  --meta-color: #0e1810;
+}
+
+/* ---------- Gothic: cathedral at night ---------- */
+:root[data-theme="gothic"] {
+  --bg: #0a070b;
+  --surface: #150d14;
+  --surface2: #1d121b;
+  --accent: #c4183a;
+  --accent-rgb: 196,24,58;
+  --accent-hover: #a5122f;
+  --accent2: #3f1b52;
+  --accent-end: #5e1d73;
+  --gold: #cfc8d6;
+  --gold-rgb: 207,200,214;
+  --teal: #7fae9f;
+  --teal-rgb: 127,174,159;
+  --text: #ece3ea;
+  --muted: #a8979f;
+  --border: #3a2232;
+  --border-hover: #742a49;
+  --on-accent: #fff;
+  --tint-rgb: 255,240,248;
+  --scrim-rgb: 0,0,0;
+  --bg-glow: #2c0818;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='64'%3E%3Cpath d='M4 64V28Q4 8 20 2Q36 8 36 28V64' fill='none' stroke='%23cfc8d6' stroke-opacity='.035'/%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #7d0c20 5%, #e0314f 42%, #e8e2ee 78%, #9a93a3 100%);
+  --logo-glow: rgba(179,18,46,.45);
+  --font-display: 'Cinzel', 'Trajan Pro', 'Big Caslon', 'Times New Roman', serif;
+  --radius: 4px;
+  --meta-color: #0a070b;
+}
+
+/* ---------- Angel: pearl, soft gold, pale sky (light) ---------- */
+:root[data-theme="angel"] {
+  --bg: #f8f4ea;
+  --surface: #fffdf7;
+  --surface2: #f1ebdc;
+  --accent: #a57620;
+  --accent-rgb: 165,118,32;
+  --accent-hover: #b88a30;
+  --accent2: #3d75b0;
+  --accent-end: #e6c97e;
+  --gold: #8a6410;
+  --gold-rgb: 138,100,16;
+  --teal: #217a73;
+  --teal-rgb: 33,122,115;
+  --text: #2a2418;
+  --muted: #6b6150;
+  --border: #dcd1b9;
+  --border-hover: #a57620;
+  --on-accent: #1a1204;
+  --tint-rgb: 70,52,16;
+  --scrim-rgb: 236,230,214;
+  --bg-glow: #fff3d1;
+  --bg-image: repeating-conic-gradient(from 0deg at 50% -10%, rgba(201,159,69,.07) 0deg 3deg, transparent 3deg 12deg);
+  --logo-grad: linear-gradient(100deg, #8f6512 10%, #c99f45 45%, #3d75b0 90%);
+  --logo-glow: rgba(201,159,69,.4);
+  --font-display: 'Hoefler Text', Baskerville, Garamond, Georgia, serif;
+  --radius: 20px;
+  --meta-color: #f8f4ea;
+}
+
+/* ---------- Fire: embers, molten orange, charcoal ---------- */
+:root[data-theme="fire"] {
+  --bg: #120806;
+  --surface: #1d0e09;
+  --surface2: #26130c;
+  --accent: #ff5a1f;
+  --accent-rgb: 255,90,31;
+  --accent-hover: #ff7840;
+  --accent2: #8a1c0c;
+  --accent-end: #ffb627;
+  --gold: #ffc94a;
+  --gold-rgb: 255,201,74;
+  --teal: #62cbb2;
+  --teal-rgb: 98,203,178;
+  --text: #f6e7dc;
+  --muted: #c09a86;
+  --border: #3f1e12;
+  --border-hover: #7d3218;
+  --on-accent: #1a0702;
+  --tint-rgb: 255,236,224;
+  --scrim-rgb: 8,3,2;
+  --bg-glow: #3d0f04;
+  --bg-image: radial-gradient(ellipse 120% 40% at 50% 110%, rgba(255,90,31,.14), transparent 70%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='80'%3E%3Ccircle cx='18' cy='62' r='1.6' fill='%23ffb627' fill-opacity='.12'/%3E%3Ccircle cx='63' cy='24' r='1.2' fill='%23ff5a1f' fill-opacity='.14'/%3E%3Ccircle cx='40' cy='44' r='.8' fill='%23ffd34a' fill-opacity='.12'/%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #e0301a 8%, #ff7a1f 45%, #ffd34a 88%);
+  --logo-glow: rgba(255,90,31,.45);
+  --font-display: 'Arial Black', 'Segoe UI Black', 'Helvetica Neue', Impact, sans-serif;
+  --radius: 12px;
+  --meta-color: #120806;
+}
+
+/* ---------- Ice: glacier, frost cyan, arctic navy ---------- */
+:root[data-theme="ice"] {
+  --bg: #07121f;
+  --surface: #0d1c2e;
+  --surface2: #12253b;
+  --accent: #5fd3f3;
+  --accent-rgb: 95,211,243;
+  --accent-hover: #8ae3fa;
+  --accent2: #1d4a78;
+  --accent-end: #d2f5ff;
+  --gold: #ffe9a3;
+  --gold-rgb: 255,233,163;
+  --teal: #6ef0c8;
+  --teal-rgb: 110,240,200;
+  --text: #e8f6fc;
+  --muted: #93b3c7;
+  --border: #1f3a55;
+  --border-hover: #3f7aa3;
+  --on-accent: #04202b;
+  --tint-rgb: 225,245,255;
+  --scrim-rgb: 2,8,16;
+  --bg-glow: #0f3350;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg stroke='%23e8f6fc' stroke-opacity='.05' fill='none'%3E%3Cpath d='M30 18v24M19.6 24l20.8 12M19.6 36l20.8-12'/%3E%3Cpath d='M0 0l10 10M60 0L50 10M0 60l10-10M60 60L50 50' stroke-opacity='.03'/%3E%3C/g%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #5fd3f3 10%, #e8f9ff 50%, #8ab8ff 90%);
+  --logo-glow: rgba(95,211,243,.4);
+  --font-display: 'Avenir Next', 'Century Gothic', Futura, 'Segoe UI', sans-serif;
+  --radius: 8px;
+  --meta-color: #07121f;
+}
+
+/* ---------- Nature: moss, bark, leaf, sunlight ---------- */
+:root[data-theme="nature"] {
+  --bg: #0c140b;
+  --surface: #142012;
+  --surface2: #1b2a18;
+  --accent: #7cc04a;
+  --accent-rgb: 124,192,74;
+  --accent-hover: #95d462;
+  --accent2: #6b4a2b;
+  --accent-end: #e0b23c;
+  --gold: #f0c04a;
+  --gold-rgb: 240,192,74;
+  --teal: #5cc9a7;
+  --teal-rgb: 92,201,167;
+  --text: #ecf2e2;
+  --muted: #a6b597;
+  --border: #2c3d25;
+  --border-hover: #557a3a;
+  --on-accent: #0c1a05;
+  --tint-rgb: 240,255,225;
+  --scrim-rgb: 4,9,3;
+  --bg-glow: #213716;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cg fill='%237cc04a' fill-opacity='.05'%3E%3Cpath d='M14 20q8-12 18-4-8 12-18 4z'/%3E%3Cpath d='M50 54q-2-14 12-14 2 14-12 14z'/%3E%3C/g%3E%3Cpath d='M0 36q18-10 36 0t36 0' fill='none' stroke='%237cc04a' stroke-opacity='.04'/%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #5aa83a 10%, #a6d65a 45%, #f0c04a 90%);
+  --logo-glow: rgba(124,192,74,.35);
+  --font-display: 'Trebuchet MS', 'Gill Sans', Candara, 'Segoe UI', sans-serif;
+  --radius: 18px;
+  --meta-color: #0c140b;
+}
+
+/* ---------- Arcane: cosmic void, violet starlight ---------- */
+:root[data-theme="arcane"] {
+  --bg: #08061a;
+  --surface: #120e2a;
+  --surface2: #1a1438;
+  --accent: #7c4dff;
+  --accent-rgb: 124,77,255;
+  --accent-hover: #6a3df0;
+  --accent2: #1e3a7a;
+  --accent-end: #c03fe0;
+  --gold: #ffd970;
+  --gold-rgb: 255,217,112;
+  --teal: #5ee6e0;
+  --teal-rgb: 94,230,224;
+  --text: #ece8ff;
+  --muted: #a59cc9;
+  --border: #2a2250;
+  --border-hover: #5a46a8;
+  --on-accent: #fff;
+  --tint-rgb: 235,228,255;
+  --scrim-rgb: 3,2,10;
+  --bg-glow: #26104d;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='120'%3E%3Ccircle cx='16' cy='28' r='.8' fill='%23fff' fill-opacity='.35'/%3E%3Ccircle cx='92' cy='84' r='.7' fill='%23c8b4ff' fill-opacity='.3'/%3E%3Ccircle cx='58' cy='60' r='1.1' fill='%23ffd970' fill-opacity='.22'/%3E%3Ccircle cx='120' cy='14' r='.6' fill='%23fff' fill-opacity='.3'/%3E%3Ccircle cx='34' cy='104' r='.6' fill='%23fff' fill-opacity='.25'/%3E%3C/svg%3E"), radial-gradient(ellipse at 80% 30%, rgba(124,77,255,.08), transparent 60%);
+  --logo-grad: linear-gradient(100deg, #7c4dff 10%, #c03fe0 50%, #5ee6e0 90%);
+  --logo-glow: rgba(124,77,255,.45);
+  --font-display: Didot, 'Bodoni 72', 'Bodoni MT', Georgia, serif;
+  --radius: 16px;
+  --meta-color: #08061a;
+}
+
+/* ---------- Abyss: deep ocean, kelp and sunken treasure ---------- */
+:root[data-theme="abyss"] {
+  --bg: #03121a;
+  --surface: #082029;
+  --surface2: #0c2b36;
+  --accent: #1fb5c4;
+  --accent-rgb: 31,181,196;
+  --accent-hover: #42cfdc;
+  --accent2: #164a6b;
+  --accent-end: #6fd68a;
+  --gold: #f4d06f;
+  --gold-rgb: 244,208,111;
+  --teal: #8ef0b5;
+  --teal-rgb: 142,240,181;
+  --text: #dff4f4;
+  --muted: #8fb3b8;
+  --border: #123c47;
+  --border-hover: #1f6a78;
+  --on-accent: #021216;
+  --tint-rgb: 220,250,250;
+  --scrim-rgb: 1,7,10;
+  --bg-glow: #06374a;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='24'%3E%3Cpath d='M0 12q10-8 20 0t20 0 20 0 20 0' fill='none' stroke='%231fb5c4' stroke-opacity='.06'/%3E%3C/svg%3E"), linear-gradient(180deg, transparent 40%, rgba(0,0,0,.25));
+  --logo-grad: linear-gradient(100deg, #1fb5c4 10%, #8ef0b5 55%, #f4d06f 95%);
+  --logo-glow: rgba(31,181,196,.4);
+  --font-display: Optima, Candara, 'Segoe UI', sans-serif;
+  --radius: 14px;
+  --meta-color: #03121a;
+}
+
+/* ---------- Desert: sun-bleached sand and sandstone (light) ---------- */
+:root[data-theme="desert"] {
+  --bg: #f1e3c8;
+  --surface: #f9f0de;
+  --surface2: #ead8b6;
+  --accent: #b0502a;
+  --accent-rgb: 176,80,42;
+  --accent-hover: #963f1d;
+  --accent2: #2d6b86;
+  --accent-end: #c8752c;
+  --gold: #855600;
+  --gold-rgb: 133,86,0;
+  --teal: #1a6e62;
+  --teal-rgb: 26,110,98;
+  --text: #2b1d10;
+  --muted: #6b5236;
+  --border: #d5bd95;
+  --border-hover: #b0502a;
+  --on-accent: #fff;
+  --tint-rgb: 80,50,15;
+  --scrim-rgb: 238,224,196;
+  --bg-glow: #fff3d6;
+  --bg-image: repeating-linear-gradient(172deg, rgba(176,80,42,.035) 0 2px, transparent 2px 22px), repeating-linear-gradient(8deg, rgba(133,86,0,.03) 0 1px, transparent 1px 34px);
+  --logo-grad: linear-gradient(100deg, #8e3a18 10%, #c8752c 50%, #2d6b86 92%);
+  --logo-glow: rgba(176,80,42,.3);
+  --font-display: Copperplate, 'Copperplate Gothic Light', 'Trajan Pro', Georgia, serif;
+  --radius: 6px;
+  --meta-color: #f1e3c8;
+}
+
+/* ============================================================
+   FLOURISHES (theme-scoped, existing class names only)
+   ============================================================ */
+
+/* Fantasy: gilded double rule on cards, heading in display face */
+:root[data-theme="fantasy"] .setup-card,
+:root[data-theme="fantasy"] .modal-box {
+  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px rgba(var(--accent-rgb), .22);
+}
+:root[data-theme="fantasy"] .setup-card h3 { font-family: var(--font-display); letter-spacing: .18em; }
+
+/* Gothic: stained-glass crimson to violet hairline on top of cards */
+:root[data-theme="gothic"] .setup-card,
+:root[data-theme="gothic"] .mode-card {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, #5e1d73, #c4183a 50%, #5e1d73) 1;
+}
+
+/* Angel: soft halo behind the logo and gentle lift on cards */
+:root[data-theme="angel"] .setup-logo { filter: drop-shadow(0 0 18px rgba(255,236,170,.9)) drop-shadow(0 0 2px rgba(201,159,69,.5)); }
+:root[data-theme="angel"] .setup-card,
+:root[data-theme="angel"] .mode-card { box-shadow: 0 6px 24px rgba(150,120,60,.12); }
+
+/* Fire: ember glow on the big CTA */
+:root[data-theme="fire"] .start-btn { box-shadow: 0 4px 24px rgba(var(--accent-rgb), .5), inset 0 -3px 10px rgba(140,20,0,.35); }
+
+/* Ice: frosted top edge on cards */
+:root[data-theme="ice"] .setup-card,
+:root[data-theme="ice"] .mode-card { box-shadow: inset 0 1px 0 rgba(232,246,252,.14); }
+
+/* Arcane: faint violet aura on mode cards */
+:root[data-theme="arcane"] .mode-card:hover { box-shadow: 0 0 28px rgba(var(--accent-rgb), .35); }

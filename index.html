@@ -8,6 +8,10 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0b0b14">
 <link rel="manifest" href="manifest.json">
+<script>
+  // Apply the saved theme before first paint so there's no flash of the default palette.
+  try { const th = localStorage.getItem('idtapthat_theme'); if (th) document.documentElement.dataset.theme = th; } catch(e) {}
+</script>
 <title>I'd Tap That – MTG Life Calculator</title>
 <style>
 /* ============================================================
@@ -28,6 +32,22 @@
   --border:    #2a2a44;
   --radius:    14px;
   --shadow:    0 8px 32px rgba(0,0,0,.7);
+  /* theme tokens (overridden per theme via :root[data-theme]) */
+  --accent-rgb:   233,69,96;
+  --accent-hover: #c73352;
+  --accent-end:   #ff6b35;
+  --gold-rgb:     255,215,0;
+  --teal-rgb:     78,205,196;
+  --border-hover: #4a4a80;
+  --on-accent:    #fff;
+  --tint-rgb:     255,255,255;
+  --scrim-rgb:    0,0,0;
+  --bg-glow:      #1a0a30;
+  --bg-image:     none;
+  --logo-grad:    linear-gradient(100deg, #e94560 20%, #ffd700 80%);
+  --logo-glow:    rgba(233,69,96,.35);
+  --font-display: inherit;
+  --meta-color:   #0b0b14;
 }
 
 html, body {
@@ -57,7 +77,7 @@ input  { font-family: inherit; color: var(--text); }
    SETUP SCREEN
    ============================================================ */
 #setup-screen {
-  background: radial-gradient(ellipse at 50% 0%, #1a0a30 0%, var(--bg) 70%);
+  background: var(--bg-image), radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 70%);
   overflow-y: auto;
   align-items: center;
   padding: 2rem 1rem 3rem;
@@ -68,12 +88,13 @@ input  { font-family: inherit; color: var(--text); }
   font-size: clamp(2.2rem, 7vw, 4.5rem);
   font-weight: 900;
   letter-spacing: .06em;
-  background: linear-gradient(100deg, #e94560 20%, #ffd700 80%);
+  font-family: var(--font-display);
+  background: var(--logo-grad);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-align: center;
-  filter: drop-shadow(0 0 20px rgba(233,69,96,.35));
+  filter: drop-shadow(0 0 20px var(--logo-glow));
 }
 
 .setup-sub {
@@ -85,7 +106,7 @@ input  { font-family: inherit; color: var(--text); }
 }
 
 .setup-card {
-  background: rgba(255,255,255,.04);
+  background: rgba(var(--tint-rgb),.04);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 1.25rem 1.5rem;
@@ -114,8 +135,8 @@ input  { font-family: inherit; color: var(--text); }
   font-weight: 600;
   transition: border-color .15s, background .15s;
 }
-.opt-btn:hover  { border-color: #4a4a80; }
-.opt-btn.sel    { border-color: var(--accent); background: var(--accent); color: #fff; }
+.opt-btn:hover  { border-color: var(--border-hover); }
+.opt-btn.sel    { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
 
 .player-configs { display: grid; gap: .6rem; }
 
@@ -146,7 +167,7 @@ input  { font-family: inherit; color: var(--text); }
 .name-input {
   flex: 1;
   padding: .45rem .75rem;
-  background: rgba(255,255,255,.06);
+  background: rgba(var(--tint-rgb),.06);
   border: 1px solid var(--border);
   border-radius: 9px;
   font-size: .92rem;
@@ -161,14 +182,14 @@ input  { font-family: inherit; color: var(--text); }
   font-weight: 800;
   letter-spacing: .07em;
   text-transform: uppercase;
-  background: linear-gradient(90deg, var(--accent) 0%, #ff6b35 100%);
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent-end) 100%);
   border: none;
   border-radius: var(--radius);
-  color: #fff;
-  box-shadow: 0 4px 24px rgba(233,69,96,.45);
+  color: var(--on-accent);
+  box-shadow: 0 4px 24px rgba(var(--accent-rgb),.45);
   transition: transform .12s, box-shadow .15s;
 }
-.start-btn:hover  { transform: translateY(-2px); box-shadow: 0 7px 28px rgba(233,69,96,.65); }
+.start-btn:hover  { transform: translateY(-2px); box-shadow: 0 7px 28px rgba(var(--accent-rgb),.65); }
 .start-btn:active { transform: translateY(0); }
 
 /* ============================================================
@@ -180,7 +201,7 @@ input  { font-family: inherit; color: var(--text); }
 .topbar {
   display: flex; align-items: center;
   padding: .3rem .65rem;
-  background: rgba(0,0,0,.92);
+  background: rgba(var(--scrim-rgb),.92);
   border-bottom: 1px solid var(--border);
   gap: .3rem;
   flex-shrink: 0;
@@ -221,7 +242,7 @@ input  { font-family: inherit; color: var(--text); }
   font-size: .9rem; flex-shrink: 0;
   transition: background .15s;
 }
-.menu-btn:hover { background: rgba(255,255,255,.08); }
+.menu-btn:hover { background: rgba(var(--tint-rgb),.08); }
 
 /* --- Players Grid --- */
 .players-grid {
@@ -261,8 +282,8 @@ input  { font-family: inherit; color: var(--text); }
   animation: glow-pulse 1.8s ease-in-out infinite;
 }
 @keyframes glow-pulse {
-  0%, 100% { opacity: 1; box-shadow: inset 0 0 12px rgba(255,215,0,.25); }
-  50%       { opacity: .45; box-shadow: inset 0 0 4px rgba(255,215,0,.05); }
+  0%, 100% { opacity: 1; box-shadow: inset 0 0 12px rgba(var(--gold-rgb),.25); }
+  50%       { opacity: .45; box-shadow: inset 0 0 4px rgba(var(--gold-rgb),.05); }
 }
 
 .player-card.eliminated { opacity: .38; filter: grayscale(.65); }
@@ -271,7 +292,7 @@ input  { font-family: inherit; color: var(--text); }
 .player-card.warn-low::before {
   content: '';
   position: absolute; inset: 0;
-  background: rgba(233,69,96,.08);
+  background: rgba(var(--accent-rgb),.08);
   animation: warn-flash 1.2s ease-in-out infinite;
   pointer-events: none; z-index: 1;
 }
@@ -371,7 +392,7 @@ input  { font-family: inherit; color: var(--text); }
   transform: translate(-50%,-50%) rotate(-12deg);
   font-size: clamp(1rem,3.5vw,2rem);
   font-weight: 900; color: var(--accent);
-  text-shadow: 0 0 24px rgba(233,69,96,.8);
+  text-shadow: 0 0 24px rgba(var(--accent-rgb),.8);
   letter-spacing: .08em; z-index: 5;
   pointer-events: none;
   white-space: nowrap;
@@ -393,13 +414,13 @@ input  { font-family: inherit; color: var(--text); }
   white-space: nowrap;
   transition: background .12s, color .12s;
 }
-.revive-btn:hover { background: rgba(233,69,96,.2); color: var(--text); border-color: var(--accent); }
+.revive-btn:hover { background: rgba(var(--accent-rgb),.2); color: var(--text); border-color: var(--accent); }
 
 /* --- Turn Controls Bar --- */
 .turnbar {
   display: flex; align-items: center; gap: .4rem;
   padding: .4rem .65rem;
-  background: rgba(0,0,0,.92);
+  background: rgba(var(--scrim-rgb),.92);
   border-top: 1px solid var(--border);
   flex-shrink: 0; height: 46px;
 }
@@ -423,8 +444,8 @@ input  { font-family: inherit; color: var(--text); }
 .ctrl-btn:active { transform: scale(.94); }
 .btn-next  { background: #164b80; color: #fff; }
 .btn-next:hover  { background: #1f5fa0; }
-.btn-endrnd { background: var(--accent); color: #fff; }
-.btn-endrnd:hover { background: #c73352; }
+.btn-endrnd { background: var(--accent); color: var(--on-accent); }
+.btn-endrnd:hover { background: var(--accent-hover); }
 .btn-endgame { background: #383850; color: var(--text); }
 .btn-endgame:hover { background: #484860; }
 
@@ -433,7 +454,7 @@ input  { font-family: inherit; color: var(--text); }
    ============================================================ */
 .modal-overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,.82);
+  background: rgba(var(--scrim-rgb),.82);
   z-index: 100;
   display: flex; align-items: center; justify-content: center;
   padding: 1rem;
@@ -454,7 +475,7 @@ input  { font-family: inherit; color: var(--text); }
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 1rem;
 }
-.modal-title { font-size: 1.05rem; font-weight: 700; }
+.modal-title { font-size: 1.05rem; font-weight: 700; font-family: var(--font-display); }
 .modal-close {
   background: none; border: none;
   color: var(--muted); font-size: 1.2rem; line-height: 1;
@@ -471,12 +492,12 @@ input  { font-family: inherit; color: var(--text); }
 .cdr-btn {
   width: 32px; height: 32px;
   border-radius: 50%; border: 1px solid var(--border);
-  background: rgba(255,255,255,.07);
-  color: #fff; font-size: 1.05rem;
+  background: rgba(var(--tint-rgb),.07);
+  color: var(--text); font-size: 1.05rem;
   display: flex; align-items: center; justify-content: center;
   transition: background .15s;
 }
-.cdr-btn:hover { background: rgba(255,255,255,.18); }
+.cdr-btn:hover { background: rgba(var(--tint-rgb),.18); }
 .cdr-val {
   font-size: 1.2rem; font-weight: 800;
   min-width: 32px; text-align: center;
@@ -489,7 +510,7 @@ input  { font-family: inherit; color: var(--text); }
 .pip {
   width: 32px; height: 32px;
   border-radius: 7px; border: 1px solid var(--border);
-  background: transparent; color: #fff;
+  background: transparent; color: var(--text);
   font-size: .72rem; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: all .12s;
@@ -500,19 +521,19 @@ input  { font-family: inherit; color: var(--text); }
 .menu-list { display: flex; flex-direction: column; gap: .45rem; }
 .menu-item {
   width: 100%; padding: .65rem .9rem;
-  background: rgba(255,255,255,.05);
+  background: rgba(var(--tint-rgb),.05);
   border: 1px solid var(--border); border-radius: 9px;
   color: var(--text); font-size: .92rem;
   text-align: left; display: flex; align-items: center; gap: .65rem;
   transition: background .15s;
 }
-.menu-item:hover { background: rgba(255,255,255,.1); }
+.menu-item:hover { background: rgba(var(--tint-rgb),.1); }
 .menu-item.danger { color: var(--accent); }
 
 /* Custom amount modal */
 .amount-input {
   width: 100%; padding: .6rem .9rem;
-  background: rgba(255,255,255,.07);
+  background: rgba(var(--tint-rgb),.07);
   border: 2px solid var(--accent);
   border-radius: 10px; color: var(--text);
   font-size: 1.6rem; font-weight: 800;
@@ -538,7 +559,7 @@ input  { font-family: inherit; color: var(--text); }
    END SCREEN
    ============================================================ */
 #end-screen {
-  background: radial-gradient(ellipse at 50% 0%, #1a0a30 0%, var(--bg) 60%);
+  background: var(--bg-image), radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 60%);
   overflow-y: auto;
   padding: 1.5rem 1rem 3rem;
   gap: 1.25rem;
@@ -552,7 +573,7 @@ input  { font-family: inherit; color: var(--text); }
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 20px rgba(255,215,0,.2));
+  filter: drop-shadow(0 0 20px rgba(var(--gold-rgb),.2));
 }
 
 .winner-box {
@@ -560,16 +581,16 @@ input  { font-family: inherit; color: var(--text); }
   padding: .9rem 1.6rem;
   border: 2px solid var(--gold);
   border-radius: var(--radius);
-  background: rgba(255,215,0,.07);
+  background: rgba(var(--gold-rgb),.07);
   max-width: 600px; width: 100%;
   font-size: clamp(.85rem,2.2vw,1.1rem);
   font-weight: 700;
-  box-shadow: 0 0 28px rgba(255,215,0,.12);
+  box-shadow: 0 0 28px rgba(var(--gold-rgb),.12);
 }
 
 .chart-wrap {
   width: 100%; max-width: 820px;
-  background: rgba(255,255,255,.025);
+  background: rgba(var(--tint-rgb),.025);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: .75rem;
@@ -590,7 +611,7 @@ input  { font-family: inherit; color: var(--text); }
 }
 .results-tbl td {
   padding: .45rem .65rem;
-  border-bottom: 1px solid rgba(255,255,255,.04);
+  border-bottom: 1px solid rgba(var(--tint-rgb),.04);
   vertical-align: middle;
 }
 
@@ -611,13 +632,13 @@ input  { font-family: inherit; color: var(--text); }
   font-size: clamp(.85rem,2.5vw,1.05rem);
   font-weight: 800; letter-spacing: .07em;
   text-transform: uppercase;
-  background: linear-gradient(90deg, var(--accent), #ff6b35);
+  background: linear-gradient(90deg, var(--accent), var(--accent-end));
   border: none; border-radius: var(--radius);
-  color: #fff;
-  box-shadow: 0 4px 20px rgba(233,69,96,.45);
+  color: var(--on-accent);
+  box-shadow: 0 4px 20px rgba(var(--accent-rgb),.45);
   transition: transform .12s, box-shadow .15s;
 }
-.play-again-btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(233,69,96,.65); }
+.play-again-btn:hover  { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(var(--accent-rgb),.65); }
 .play-again-btn:active { transform: translateY(0); }
 
 /* ============================================================
@@ -649,7 +670,7 @@ input  { font-family: inherit; color: var(--text); }
    ============================================================ */
 .skip-link {
   position: fixed; top: -100px; left: 1rem; z-index: 9999;
-  background: var(--accent); color: #fff;
+  background: var(--accent); color: var(--on-accent);
   padding: .5rem 1rem; border-radius: 8px;
   font-weight: 700; text-decoration: none;
   transition: top .1s;
@@ -674,13 +695,13 @@ input  { font-family: inherit; color: var(--text); }
 }
 .util-btn {
   padding: .3rem .55rem;
-  background: rgba(255,255,255,.06);
+  background: rgba(var(--tint-rgb),.06);
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text); font-size: .82rem;
   transition: background .15s;
 }
-.util-btn:hover { background: rgba(255,255,255,.12); }
+.util-btn:hover { background: rgba(var(--tint-rgb),.12); }
 .util-btn[aria-pressed="true"] { border-color: var(--accent); }
 
 /* ============================================================
@@ -689,7 +710,7 @@ input  { font-family: inherit; color: var(--text); }
 .commander-input {
   flex: 1;
   padding: .35rem .65rem;
-  background: rgba(255,255,255,.04);
+  background: rgba(var(--tint-rgb),.04);
   border: 1px dashed var(--border);
   border-radius: 9px;
   font-size: .78rem;
@@ -706,19 +727,19 @@ input  { font-family: inherit; color: var(--text); }
    ============================================================ */
 .career-clear-btn {
   padding: .4rem .9rem;
-  background: rgba(233,69,96,.12);
+  background: rgba(var(--accent-rgb),.12);
   border: 1px solid var(--accent);
   border-radius: 8px;
   color: var(--accent); font-size: .78rem; cursor: pointer;
   transition: background .15s;
 }
-.career-clear-btn:hover { background: rgba(233,69,96,.25); }
+.career-clear-btn:hover { background: rgba(var(--accent-rgb),.25); }
 
 /* ============================================================
    TOURNAMENT SCREEN
    ============================================================ */
 #tournament-screen {
-  background: radial-gradient(ellipse at 50% 0%, #1a0a30 0%, var(--bg) 70%);
+  background: var(--bg-image), radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 70%);
   overflow-y: auto;
   align-items: center;
   padding: 2rem 1rem 3rem;
@@ -749,7 +770,7 @@ input  { font-family: inherit; color: var(--text); }
 }
 .tourn-standings-wrap td {
   padding: .4rem .65rem;
-  border-bottom: 1px solid rgba(255,255,255,.04);
+  border-bottom: 1px solid rgba(var(--tint-rgb),.04);
 }
 
 .tourn-pairings-wrap {
@@ -758,7 +779,7 @@ input  { font-family: inherit; color: var(--text); }
 }
 
 .pod-card {
-  background: rgba(255,255,255,.04);
+  background: rgba(var(--tint-rgb),.04);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: .85rem 1.1rem;
@@ -777,9 +798,9 @@ input  { font-family: inherit; color: var(--text); }
 .pod-start-btn {
   margin-top: .6rem;
   padding: .35rem .9rem;
-  background: linear-gradient(90deg, var(--accent), #ff6b35);
+  background: linear-gradient(90deg, var(--accent), var(--accent-end));
   border: none; border-radius: 8px;
-  color: #fff; font-size: .82rem; font-weight: 700;
+  color: var(--on-accent); font-size: .82rem; font-weight: 700;
   cursor: pointer; transition: opacity .15s;
 }
 .pod-start-btn:hover { opacity: .85; }
@@ -801,7 +822,7 @@ input  { font-family: inherit; color: var(--text); }
 }
 .tourn-select {
   padding: .35rem .65rem;
-  background: rgba(255,255,255,.06);
+  background: rgba(var(--tint-rgb),.06);
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text); font-size: .82rem;
@@ -811,7 +832,7 @@ input  { font-family: inherit; color: var(--text); }
    MODE SELECT SCREEN
    ============================================================ */
 #mode-screen {
-  background: radial-gradient(ellipse at 50% 0%, #1a0a30 0%, var(--bg) 70%);
+  background: var(--bg-image), radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 70%);
   overflow-y: auto;
   align-items: center; justify-content: center;
   padding: 2rem 1rem 3rem;
@@ -826,14 +847,14 @@ input  { font-family: inherit; color: var(--text); }
 .mode-card {
   display: flex; flex-direction: column; align-items: center; text-align: center;
   gap: .5rem;
-  background: rgba(255,255,255,.04);
+  background: rgba(var(--tint-rgb),.04);
   border: 2px solid var(--border);
   border-radius: var(--radius);
   padding: 2rem 1.5rem;
   color: var(--text);
   transition: border-color .15s, transform .12s, background .15s;
 }
-.mode-card:hover { border-color: var(--accent); transform: translateY(-3px); background: rgba(255,255,255,.07); }
+.mode-card:hover { border-color: var(--accent); transform: translateY(-3px); background: rgba(var(--tint-rgb),.07); }
 .mode-card-icon { font-size: 2.6rem; }
 .mode-card-title { font-size: 1.15rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
 .mode-card-desc { font-size: .82rem; color: var(--muted); line-height: 1.5; }
@@ -846,7 +867,7 @@ input  { font-family: inherit; color: var(--text); }
 .tmm-roster-list { display: flex; flex-wrap: wrap; gap: .45rem; }
 .tmm-roster-chip {
   display: flex; align-items: center; gap: .4rem;
-  background: rgba(255,255,255,.06);
+  background: rgba(var(--tint-rgb),.06);
   border: 1px solid var(--border); border-radius: 20px;
   padding: .3rem .5rem .3rem .7rem;
   font-size: .85rem; font-weight: 600;
@@ -856,7 +877,7 @@ input  { font-family: inherit; color: var(--text); }
   font-size: .85rem; line-height: 1; padding: .15rem .3rem;
   border-radius: 50%; transition: background .15s, color .15s;
 }
-.tmm-roster-chip-remove:hover { background: rgba(233,69,96,.2); color: var(--accent); }
+.tmm-roster-chip-remove:hover { background: rgba(var(--accent-rgb),.2); color: var(--accent); }
 
 /* ============================================================
    TMM: POD VICTOR CONTROLS
@@ -865,24 +886,24 @@ input  { font-family: inherit; color: var(--text); }
 .pod-player-btn {
   border: 2px solid var(--border);
   border-radius: 8px;
-  background: rgba(255,255,255,.05);
+  background: rgba(var(--tint-rgb),.05);
   color: var(--text);
   padding: .4rem .75rem;
   font-size: .85rem; font-weight: 700;
   transition: border-color .15s, background .15s;
 }
-.pod-player-btn:hover { border-color: var(--gold); background: rgba(255,215,0,.1); }
+.pod-player-btn:hover { border-color: var(--gold); background: rgba(var(--gold-rgb),.1); }
 .pod-winner-line { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-top: .5rem; }
 .pod-unset-btn {
   padding: .28rem .6rem;
-  background: rgba(255,255,255,.06);
+  background: rgba(var(--tint-rgb),.06);
   border: 1px solid var(--border);
   border-radius: 7px;
   color: var(--muted); font-size: .72rem;
   transition: background .15s, color .15s;
 }
-.pod-unset-btn:hover { background: rgba(233,69,96,.15); color: var(--accent); border-color: var(--accent); }
-.pod-card.pod-bye { border-color: var(--teal); background: rgba(78,205,196,.06); }
+.pod-unset-btn:hover { background: rgba(var(--accent-rgb),.15); color: var(--accent); border-color: var(--accent); }
+.pod-card.pod-bye { border-color: var(--teal); background: rgba(var(--teal-rgb),.06); }
 .pod-bye-note { color: var(--teal); font-weight: 700; font-size: .85rem; margin-top: .4rem; }
 
 /* ============================================================
@@ -895,18 +916,18 @@ input  { font-family: inherit; color: var(--text); }
 .tmm-tools-row { display: flex; gap: .5rem; flex-wrap: wrap; justify-content: center; }
 .tmm-tool-btn {
   padding: .4rem .85rem;
-  background: rgba(255,255,255,.06);
+  background: rgba(var(--tint-rgb),.06);
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--text); font-size: .8rem; font-weight: 600;
   transition: background .15s;
 }
-.tmm-tool-btn:hover { background: rgba(255,255,255,.12); }
+.tmm-tool-btn:hover { background: rgba(var(--tint-rgb),.12); }
 .tmm-tool-btn:disabled { opacity: .4; cursor: not-allowed; }
 .tmm-swap-panel {
   display: none;
   gap: .5rem; flex-wrap: wrap; align-items: center; justify-content: center;
-  background: rgba(255,255,255,.03);
+  background: rgba(var(--tint-rgb),.03);
   border: 1px solid var(--border); border-radius: 9px;
   padding: .65rem .85rem;
 }
@@ -934,9 +955,9 @@ input  { font-family: inherit; color: var(--text); }
 .champion-modal-box {
   max-width: 420px;
   text-align: center;
-  background: radial-gradient(ellipse at 50% -10%, rgba(255,215,0,.14) 0%, var(--surface) 60%);
+  background: radial-gradient(ellipse at 50% -10%, rgba(var(--gold-rgb),.14) 0%, var(--surface) 60%);
   border: 2px solid var(--gold);
-  box-shadow: 0 0 60px rgba(255,215,0,.25), var(--shadow);
+  box-shadow: 0 0 60px rgba(var(--gold-rgb),.25), var(--shadow);
   animation: champion-pop .45s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes champion-pop {
@@ -945,7 +966,7 @@ input  { font-family: inherit; color: var(--text); }
 }
 .champion-modal-trophy {
   font-size: 3.2rem;
-  filter: drop-shadow(0 0 18px rgba(255,215,0,.6));
+  filter: drop-shadow(0 0 18px rgba(var(--gold-rgb),.6));
   animation: champion-bounce 1.4s ease-in-out infinite;
 }
 @keyframes champion-bounce {
@@ -983,9 +1004,385 @@ input  { font-family: inherit; color: var(--text); }
 }
 
 /* ============================================================
+   OPTIONS MODAL & THEME PICKER
+   ============================================================ */
+.options-box { max-width: 560px; }
+.options-section-label {
+  font-size: .72rem; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--muted);
+  margin-bottom: .6rem;
+}
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: .6rem;
+}
+.theme-tile {
+  display: flex; flex-direction: column; gap: .3rem;
+  padding: .35rem .35rem .5rem;
+  background: rgba(var(--tint-rgb),.04);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  color: var(--text); text-align: left;
+  transition: border-color .15s, transform .12s, background .15s;
+}
+.theme-tile:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+.theme-tile[aria-checked="true"] {
+  border-color: var(--accent);
+  background: rgba(var(--accent-rgb),.1);
+}
+.theme-preview {
+  display: block; width: 100%; aspect-ratio: 3 / 2;
+  border-radius: 6px; overflow: hidden;
+  background: #000;
+}
+.theme-preview svg { display: block; width: 100%; height: 100%; }
+.theme-name { font-size: .82rem; font-weight: 700; padding: 0 .15rem; }
+.theme-tag  { font-size: .66rem; color: var(--muted); padding: 0 .15rem; line-height: 1.25; }
+
+/* ============================================================
+   THEMES
+   ============================================================ */
+/* --- Built-in themes --- */
+:root[data-theme="daylight"] {
+  --bg: #f3f4f8; --surface: #ffffff; --surface2: #e9ebf2;
+  --accent: #d6334f; --accent-rgb: 214,51,79; --accent-hover: #b52741; --accent-end: #e8692e;
+  --accent2: #2b5797; --gold: #a86f00; --gold-rgb: 168,111,0; --teal: #127a73; --teal-rgb: 18,122,115;
+  --text: #1b1d29; --muted: #5a5f73; --border: #d3d6e2; --border-hover: #9aa0b8;
+  --on-accent: #ffffff; --tint-rgb: 30,35,60; --scrim-rgb: 230,232,240;
+  --bg-glow: #ffe3e8; --bg-image: none;
+  --logo-grad: linear-gradient(100deg, #d6334f 20%, #e8692e 80%); --logo-glow: rgba(214,51,79,.18);
+  --shadow: 0 8px 28px rgba(30,35,60,.18); --meta-color: #f3f4f8;
+}
+:root[data-theme="synthwave"] {
+  --bg: #120424; --surface: #1d0938; --surface2: #2a0f4d;
+  --accent: #ff2bd6; --accent-rgb: 255,43,214; --accent-hover: #d61fb3; --accent-end: #ffb02e;
+  --accent2: #3a1a8a; --gold: #ffd23f; --gold-rgb: 255,210,63; --teal: #2de2e6; --teal-rgb: 45,226,230;
+  --text: #f7eaff; --muted: #b59ad1; --border: #3d1c66; --border-hover: #7a3fc0;
+  --on-accent: #1a0326; --tint-rgb: 255,255,255; --scrim-rgb: 10,2,22;
+  --bg-glow: #4a0d5e;
+  --bg-image: repeating-linear-gradient(0deg, rgba(255,43,214,.05) 0 1px, transparent 1px 28px), repeating-linear-gradient(90deg, rgba(45,226,230,.04) 0 1px, transparent 1px 28px);
+  --logo-grad: linear-gradient(100deg, #ff2bd6 15%, #ffb02e 85%); --logo-glow: rgba(255,43,214,.5);
+  --font-display: 'Trebuchet MS', 'Segoe UI', system-ui, sans-serif; --meta-color: #120424;
+}
+:root[data-theme="slate"] {
+  --bg: #121417; --surface: #1b1e23; --surface2: #23272e;
+  --accent: #8fa3bf; --accent-rgb: 143,163,191; --accent-hover: #7489a6; --accent-end: #c3ccd9;
+  --accent2: #3b4656; --gold: #e2c98f; --gold-rgb: 226,201,143; --teal: #8fc1b5; --teal-rgb: 143,193,181;
+  --text: #e6e8eb; --muted: #959ba5; --border: #2e333b; --border-hover: #4c5461;
+  --on-accent: #101215; --tint-rgb: 255,255,255; --scrim-rgb: 0,0,0;
+  --bg-glow: #1f242c; --bg-image: none;
+  --logo-grad: linear-gradient(100deg, #e6e8eb 20%, #8fa3bf 80%); --logo-glow: rgba(143,163,191,.2);
+  --meta-color: #121417;
+}
+/* --- Custom themes --- */
+/* ---------- Fantasy: elder kingdoms, parchment and gold leaf ---------- */
+:root[data-theme="fantasy"] {
+  --bg: #0e1810;
+  --surface: #162318;
+  --surface2: #1d2d1f;
+  --accent: #d4a838;
+  --accent-rgb: 212,168,56;
+  --accent-hover: #e6bf5a;
+  --accent2: #26386e;
+  --accent-end: #f0d585;
+  --gold: #f2d27a;
+  --gold-rgb: 242,210,122;
+  --teal: #7fcfa3;
+  --teal-rgb: 127,207,163;
+  --text: #efe6cf;
+  --muted: #b3a787;
+  --border: #364631;
+  --border-hover: #8a7a3e;
+  --on-accent: #1c1405;
+  --tint-rgb: 255,248,225;
+  --scrim-rgb: 6,12,7;
+  --bg-glow: #263a20;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M24 4l20 20-20 20L4 24z' fill='none' stroke='%23d4a838' stroke-opacity='.06'/%3E%3Ccircle cx='24' cy='24' r='2' fill='%23d4a838' fill-opacity='.07'/%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #b8892a 10%, #f6dc8c 48%, #fff4cf 55%, #c99a35 90%);
+  --logo-glow: rgba(212,168,56,.35);
+  --font-display: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --radius: 10px;
+  --meta-color: #0e1810;
+}
+
+/* ---------- Gothic: cathedral at night ---------- */
+:root[data-theme="gothic"] {
+  --bg: #0a070b;
+  --surface: #150d14;
+  --surface2: #1d121b;
+  --accent: #c4183a;
+  --accent-rgb: 196,24,58;
+  --accent-hover: #a5122f;
+  --accent2: #3f1b52;
+  --accent-end: #5e1d73;
+  --gold: #cfc8d6;
+  --gold-rgb: 207,200,214;
+  --teal: #7fae9f;
+  --teal-rgb: 127,174,159;
+  --text: #ece3ea;
+  --muted: #a8979f;
+  --border: #3a2232;
+  --border-hover: #742a49;
+  --on-accent: #fff;
+  --tint-rgb: 255,240,248;
+  --scrim-rgb: 0,0,0;
+  --bg-glow: #2c0818;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='64'%3E%3Cpath d='M4 64V28Q4 8 20 2Q36 8 36 28V64' fill='none' stroke='%23cfc8d6' stroke-opacity='.035'/%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #7d0c20 5%, #e0314f 42%, #e8e2ee 78%, #9a93a3 100%);
+  --logo-glow: rgba(179,18,46,.45);
+  --font-display: 'Cinzel', 'Trajan Pro', 'Big Caslon', 'Times New Roman', serif;
+  --radius: 4px;
+  --meta-color: #0a070b;
+}
+
+/* ---------- Angel: pearl, soft gold, pale sky (light) ---------- */
+:root[data-theme="angel"] {
+  --bg: #f8f4ea;
+  --surface: #fffdf7;
+  --surface2: #f1ebdc;
+  --accent: #a57620;
+  --accent-rgb: 165,118,32;
+  --accent-hover: #b88a30;
+  --accent2: #3d75b0;
+  --accent-end: #e6c97e;
+  --gold: #8a6410;
+  --gold-rgb: 138,100,16;
+  --teal: #217a73;
+  --teal-rgb: 33,122,115;
+  --text: #2a2418;
+  --muted: #6b6150;
+  --border: #dcd1b9;
+  --border-hover: #a57620;
+  --on-accent: #1a1204;
+  --tint-rgb: 70,52,16;
+  --scrim-rgb: 236,230,214;
+  --bg-glow: #fff3d1;
+  --bg-image: repeating-conic-gradient(from 0deg at 50% -10%, rgba(201,159,69,.07) 0deg 3deg, transparent 3deg 12deg);
+  --logo-grad: linear-gradient(100deg, #8f6512 10%, #c99f45 45%, #3d75b0 90%);
+  --logo-glow: rgba(201,159,69,.4);
+  --font-display: 'Hoefler Text', Baskerville, Garamond, Georgia, serif;
+  --radius: 20px;
+  --meta-color: #f8f4ea;
+}
+
+/* ---------- Fire: embers, molten orange, charcoal ---------- */
+:root[data-theme="fire"] {
+  --bg: #120806;
+  --surface: #1d0e09;
+  --surface2: #26130c;
+  --accent: #ff5a1f;
+  --accent-rgb: 255,90,31;
+  --accent-hover: #ff7840;
+  --accent2: #8a1c0c;
+  --accent-end: #ffb627;
+  --gold: #ffc94a;
+  --gold-rgb: 255,201,74;
+  --teal: #62cbb2;
+  --teal-rgb: 98,203,178;
+  --text: #f6e7dc;
+  --muted: #c09a86;
+  --border: #3f1e12;
+  --border-hover: #7d3218;
+  --on-accent: #1a0702;
+  --tint-rgb: 255,236,224;
+  --scrim-rgb: 8,3,2;
+  --bg-glow: #3d0f04;
+  --bg-image: radial-gradient(ellipse 120% 40% at 50% 110%, rgba(255,90,31,.14), transparent 70%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='80'%3E%3Ccircle cx='18' cy='62' r='1.6' fill='%23ffb627' fill-opacity='.12'/%3E%3Ccircle cx='63' cy='24' r='1.2' fill='%23ff5a1f' fill-opacity='.14'/%3E%3Ccircle cx='40' cy='44' r='.8' fill='%23ffd34a' fill-opacity='.12'/%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #e0301a 8%, #ff7a1f 45%, #ffd34a 88%);
+  --logo-glow: rgba(255,90,31,.45);
+  --font-display: 'Arial Black', 'Segoe UI Black', 'Helvetica Neue', Impact, sans-serif;
+  --radius: 12px;
+  --meta-color: #120806;
+}
+
+/* ---------- Ice: glacier, frost cyan, arctic navy ---------- */
+:root[data-theme="ice"] {
+  --bg: #07121f;
+  --surface: #0d1c2e;
+  --surface2: #12253b;
+  --accent: #5fd3f3;
+  --accent-rgb: 95,211,243;
+  --accent-hover: #8ae3fa;
+  --accent2: #1d4a78;
+  --accent-end: #d2f5ff;
+  --gold: #ffe9a3;
+  --gold-rgb: 255,233,163;
+  --teal: #6ef0c8;
+  --teal-rgb: 110,240,200;
+  --text: #e8f6fc;
+  --muted: #93b3c7;
+  --border: #1f3a55;
+  --border-hover: #3f7aa3;
+  --on-accent: #04202b;
+  --tint-rgb: 225,245,255;
+  --scrim-rgb: 2,8,16;
+  --bg-glow: #0f3350;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cg stroke='%23e8f6fc' stroke-opacity='.05' fill='none'%3E%3Cpath d='M30 18v24M19.6 24l20.8 12M19.6 36l20.8-12'/%3E%3Cpath d='M0 0l10 10M60 0L50 10M0 60l10-10M60 60L50 50' stroke-opacity='.03'/%3E%3C/g%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #5fd3f3 10%, #e8f9ff 50%, #8ab8ff 90%);
+  --logo-glow: rgba(95,211,243,.4);
+  --font-display: 'Avenir Next', 'Century Gothic', Futura, 'Segoe UI', sans-serif;
+  --radius: 8px;
+  --meta-color: #07121f;
+}
+
+/* ---------- Nature: moss, bark, leaf, sunlight ---------- */
+:root[data-theme="nature"] {
+  --bg: #0c140b;
+  --surface: #142012;
+  --surface2: #1b2a18;
+  --accent: #7cc04a;
+  --accent-rgb: 124,192,74;
+  --accent-hover: #95d462;
+  --accent2: #6b4a2b;
+  --accent-end: #e0b23c;
+  --gold: #f0c04a;
+  --gold-rgb: 240,192,74;
+  --teal: #5cc9a7;
+  --teal-rgb: 92,201,167;
+  --text: #ecf2e2;
+  --muted: #a6b597;
+  --border: #2c3d25;
+  --border-hover: #557a3a;
+  --on-accent: #0c1a05;
+  --tint-rgb: 240,255,225;
+  --scrim-rgb: 4,9,3;
+  --bg-glow: #213716;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cg fill='%237cc04a' fill-opacity='.05'%3E%3Cpath d='M14 20q8-12 18-4-8 12-18 4z'/%3E%3Cpath d='M50 54q-2-14 12-14 2 14-12 14z'/%3E%3C/g%3E%3Cpath d='M0 36q18-10 36 0t36 0' fill='none' stroke='%237cc04a' stroke-opacity='.04'/%3E%3C/svg%3E");
+  --logo-grad: linear-gradient(100deg, #5aa83a 10%, #a6d65a 45%, #f0c04a 90%);
+  --logo-glow: rgba(124,192,74,.35);
+  --font-display: 'Trebuchet MS', 'Gill Sans', Candara, 'Segoe UI', sans-serif;
+  --radius: 18px;
+  --meta-color: #0c140b;
+}
+
+/* ---------- Arcane: cosmic void, violet starlight ---------- */
+:root[data-theme="arcane"] {
+  --bg: #08061a;
+  --surface: #120e2a;
+  --surface2: #1a1438;
+  --accent: #7c4dff;
+  --accent-rgb: 124,77,255;
+  --accent-hover: #6a3df0;
+  --accent2: #1e3a7a;
+  --accent-end: #c03fe0;
+  --gold: #ffd970;
+  --gold-rgb: 255,217,112;
+  --teal: #5ee6e0;
+  --teal-rgb: 94,230,224;
+  --text: #ece8ff;
+  --muted: #a59cc9;
+  --border: #2a2250;
+  --border-hover: #5a46a8;
+  --on-accent: #fff;
+  --tint-rgb: 235,228,255;
+  --scrim-rgb: 3,2,10;
+  --bg-glow: #26104d;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='120'%3E%3Ccircle cx='16' cy='28' r='.8' fill='%23fff' fill-opacity='.35'/%3E%3Ccircle cx='92' cy='84' r='.7' fill='%23c8b4ff' fill-opacity='.3'/%3E%3Ccircle cx='58' cy='60' r='1.1' fill='%23ffd970' fill-opacity='.22'/%3E%3Ccircle cx='120' cy='14' r='.6' fill='%23fff' fill-opacity='.3'/%3E%3Ccircle cx='34' cy='104' r='.6' fill='%23fff' fill-opacity='.25'/%3E%3C/svg%3E"), radial-gradient(ellipse at 80% 30%, rgba(124,77,255,.08), transparent 60%);
+  --logo-grad: linear-gradient(100deg, #7c4dff 10%, #c03fe0 50%, #5ee6e0 90%);
+  --logo-glow: rgba(124,77,255,.45);
+  --font-display: Didot, 'Bodoni 72', 'Bodoni MT', Georgia, serif;
+  --radius: 16px;
+  --meta-color: #08061a;
+}
+
+/* ---------- Abyss: deep ocean, kelp and sunken treasure ---------- */
+:root[data-theme="abyss"] {
+  --bg: #03121a;
+  --surface: #082029;
+  --surface2: #0c2b36;
+  --accent: #1fb5c4;
+  --accent-rgb: 31,181,196;
+  --accent-hover: #42cfdc;
+  --accent2: #164a6b;
+  --accent-end: #6fd68a;
+  --gold: #f4d06f;
+  --gold-rgb: 244,208,111;
+  --teal: #8ef0b5;
+  --teal-rgb: 142,240,181;
+  --text: #dff4f4;
+  --muted: #8fb3b8;
+  --border: #123c47;
+  --border-hover: #1f6a78;
+  --on-accent: #021216;
+  --tint-rgb: 220,250,250;
+  --scrim-rgb: 1,7,10;
+  --bg-glow: #06374a;
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='24'%3E%3Cpath d='M0 12q10-8 20 0t20 0 20 0 20 0' fill='none' stroke='%231fb5c4' stroke-opacity='.06'/%3E%3C/svg%3E"), linear-gradient(180deg, transparent 40%, rgba(0,0,0,.25));
+  --logo-grad: linear-gradient(100deg, #1fb5c4 10%, #8ef0b5 55%, #f4d06f 95%);
+  --logo-glow: rgba(31,181,196,.4);
+  --font-display: Optima, Candara, 'Segoe UI', sans-serif;
+  --radius: 14px;
+  --meta-color: #03121a;
+}
+
+/* ---------- Desert: sun-bleached sand and sandstone (light) ---------- */
+:root[data-theme="desert"] {
+  --bg: #f1e3c8;
+  --surface: #f9f0de;
+  --surface2: #ead8b6;
+  --accent: #b0502a;
+  --accent-rgb: 176,80,42;
+  --accent-hover: #963f1d;
+  --accent2: #2d6b86;
+  --accent-end: #c8752c;
+  --gold: #855600;
+  --gold-rgb: 133,86,0;
+  --teal: #1a6e62;
+  --teal-rgb: 26,110,98;
+  --text: #2b1d10;
+  --muted: #6b5236;
+  --border: #d5bd95;
+  --border-hover: #b0502a;
+  --on-accent: #fff;
+  --tint-rgb: 80,50,15;
+  --scrim-rgb: 238,224,196;
+  --bg-glow: #fff3d6;
+  --bg-image: repeating-linear-gradient(172deg, rgba(176,80,42,.035) 0 2px, transparent 2px 22px), repeating-linear-gradient(8deg, rgba(133,86,0,.03) 0 1px, transparent 1px 34px);
+  --logo-grad: linear-gradient(100deg, #8e3a18 10%, #c8752c 50%, #2d6b86 92%);
+  --logo-glow: rgba(176,80,42,.3);
+  --font-display: Copperplate, 'Copperplate Gothic Light', 'Trajan Pro', Georgia, serif;
+  --radius: 6px;
+  --meta-color: #f1e3c8;
+}
+
+/* ============================================================
+   FLOURISHES (theme-scoped, existing class names only)
+   ============================================================ */
+
+/* Fantasy: gilded double rule on cards, heading in display face */
+:root[data-theme="fantasy"] .setup-card,
+:root[data-theme="fantasy"] .modal-box {
+  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px rgba(var(--accent-rgb), .22);
+}
+:root[data-theme="fantasy"] .setup-card h3 { font-family: var(--font-display); letter-spacing: .18em; }
+
+/* Gothic: stained-glass crimson to violet hairline on top of cards */
+:root[data-theme="gothic"] .setup-card,
+:root[data-theme="gothic"] .mode-card {
+  border-top: 2px solid transparent;
+  border-image: linear-gradient(90deg, #5e1d73, #c4183a 50%, #5e1d73) 1;
+}
+
+/* Angel: soft halo behind the logo and gentle lift on cards */
+:root[data-theme="angel"] .setup-logo { filter: drop-shadow(0 0 18px rgba(255,236,170,.9)) drop-shadow(0 0 2px rgba(201,159,69,.5)); }
+:root[data-theme="angel"] .setup-card,
+:root[data-theme="angel"] .mode-card { box-shadow: 0 6px 24px rgba(150,120,60,.12); }
+
+/* Fire: ember glow on the big CTA */
+:root[data-theme="fire"] .start-btn { box-shadow: 0 4px 24px rgba(var(--accent-rgb), .5), inset 0 -3px 10px rgba(140,20,0,.35); }
+
+/* Ice: frosted top edge on cards */
+:root[data-theme="ice"] .setup-card,
+:root[data-theme="ice"] .mode-card { box-shadow: inset 0 1px 0 rgba(232,246,252,.14); }
+
+/* Arcane: faint violet aura on mode cards */
+:root[data-theme="arcane"] .mode-card:hover { box-shadow: 0 0 28px rgba(var(--accent-rgb), .35); }
+
+/* ============================================================
    HIGH-CONTRAST THEME
    ============================================================ */
-.hc-mode {
+:root.hc-mode {
   --bg:      #000000;
   --surface: #111111;
   --surface2:#1a1a1a;
@@ -995,6 +1392,21 @@ input  { font-family: inherit; color: var(--text); }
   --text:    #ffffff;
   --muted:   #aaaaaa;
   --border:  #444444;
+  --accent-rgb:   255,0,64;
+  --accent-hover: #ff3366;
+  --accent-end:   #ff0040;
+  --accent2:      #003399;
+  --gold-rgb:     255,238,0;
+  --teal-rgb:     0,255,238;
+  --border-hover: #888888;
+  --on-accent:    #ffffff;
+  --tint-rgb:     255,255,255;
+  --scrim-rgb:    0,0,0;
+  --bg-glow:      #000000;
+  --bg-image:     none;
+  --logo-grad:    linear-gradient(90deg, #ffffff, #ffee00);
+  --logo-glow:    transparent;
+  --meta-color:   #000000;
 }
 .hc-mode .player-card { border: 2px solid var(--border); }
 .hc-mode .life-total { text-shadow: 0 0 8px currentColor; }
@@ -1010,7 +1422,7 @@ input  { font-family: inherit; color: var(--text); }
   font-size: .85rem; flex-shrink: 0;
   transition: background .15s;
 }
-.tb-sound-btn:hover { background: rgba(255,255,255,.08); }
+.tb-sound-btn:hover { background: rgba(var(--tint-rgb),.08); }
 </style>
 </head>
 <body>
@@ -1024,6 +1436,7 @@ input  { font-family: inherit; color: var(--text); }
 <div id="mode-screen" class="screen" aria-label="Choose a mode">
   <div class="topbar-controls">
     <button class="util-btn sound-toggle-btn" id="sound-toggle-mode" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
+    <button class="util-btn options-btn" id="options-btn-mode" aria-label="Open options" aria-haspopup="dialog" title="Options">⚙️</button>
     <button class="util-btn hc-toggle-btn" id="hc-toggle-mode" aria-pressed="false" aria-label="Toggle high-contrast mode" title="High contrast">◑</button>
   </div>
   <div class="setup-logo" aria-label="I'd Tap That MTG Life Calculator">⚡ I'D TAP THAT</div>
@@ -1051,6 +1464,7 @@ input  { font-family: inherit; color: var(--text); }
   <div class="topbar-controls">
     <button class="util-btn" id="setup-back-btn" aria-label="Back to mode select" title="Back to mode select" style="margin-right:auto">← Mode Select</button>
     <button class="util-btn sound-toggle-btn" id="sound-toggle-setup" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
+    <button class="util-btn options-btn" id="options-btn-setup" aria-label="Open options" aria-haspopup="dialog" title="Options">⚙️</button>
     <button class="util-btn hc-toggle-btn" id="hc-toggle-setup" aria-pressed="false" aria-label="Toggle high-contrast mode" title="High contrast">◑</button>
   </div>
   <div class="setup-logo" aria-label="I'd Tap That MTG Life Calculator">⚡ I'D TAP THAT</div>
@@ -1104,6 +1518,7 @@ input  { font-family: inherit; color: var(--text); }
     <button class="tb-sound-btn" id="tb-pause-btn" aria-label="Pause timers" title="Pause timers">⏸</button>
     <button class="tb-sound-btn" id="tb-undo-btn" aria-label="Undo last life change" title="Undo life change">↩</button>
     <button class="tb-sound-btn sound-toggle-btn" id="sound-toggle-game" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
+    <button class="tb-sound-btn options-btn" id="options-btn-game" aria-label="Open options" aria-haspopup="dialog" title="Options">⚙️</button>
     <button class="menu-btn" id="menu-btn" aria-label="Open menu" aria-haspopup="dialog">☰</button>
   </div>
 
@@ -1217,13 +1632,24 @@ input  { font-family: inherit; color: var(--text); }
 
   <div class="match-stats" id="match-stats" aria-live="polite"></div>
 
-  <button class="play-again-btn" id="career-btn" aria-label="View career stats" style="background:linear-gradient(90deg,#0f3460,#1a4a7a);box-shadow:0 4px 20px rgba(15,52,96,.45)">📊 Career Stats</button>
+  <button class="play-again-btn" id="career-btn" aria-label="View career stats" style="background:var(--accent2);box-shadow:0 4px 20px rgba(0,0,0,.3)">📊 Career Stats</button>
   <button class="play-again-btn" id="play-again-btn" aria-label="Play again">⚡ Play Again</button>
 </div>
 
 <!-- ============================================================
      CAREER STATS MODAL
      ============================================================ -->
+<div id="options-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="options-modal-title">
+  <div class="modal-box options-box">
+    <div class="modal-head">
+      <span class="modal-title" id="options-modal-title">⚙️ Options</span>
+      <button class="modal-close" id="options-close" aria-label="Close options">✕</button>
+    </div>
+    <div class="options-section-label" id="theme-grid-label">Theme</div>
+    <div class="theme-grid" id="theme-grid" role="radiogroup" aria-labelledby="theme-grid-label"></div>
+  </div>
+</div>
+
 <div id="career-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="career-modal-title">
   <div class="modal-box">
     <div class="modal-head">
@@ -1241,6 +1667,7 @@ input  { font-family: inherit; color: var(--text); }
   <div class="topbar-controls">
     <button class="util-btn" id="tourn-back-btn" aria-label="Back to mode select" title="Back to mode select" style="margin-right:auto">← Mode Select</button>
     <button class="util-btn sound-toggle-btn" id="sound-toggle-tourn" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
+    <button class="util-btn options-btn" id="options-btn-tourn" aria-label="Open options" aria-haspopup="dialog" title="Options">⚙️</button>
     <button class="util-btn hc-toggle-btn" id="hc-toggle-tourn" aria-pressed="false" aria-label="Toggle high-contrast mode" title="High contrast">◑</button>
   </div>
   <div class="setup-logo" style="font-size:clamp(1.6rem,5vw,3rem)">🏆 TOURNAMENT MANAGEMENT</div>
@@ -1481,6 +1908,99 @@ function toggleHighContrast() {
   document.documentElement.classList.toggle('hc-mode', highContrastMode);
   document.querySelectorAll('.hc-toggle-btn').forEach(b => b.setAttribute('aria-pressed', highContrastMode.toString()));
   try { localStorage.setItem('idtapthat_hc', highContrastMode ? '1' : '0'); } catch(e) {}
+}
+
+/* ============================================================
+   THEMES & OPTIONS
+   ============================================================ */
+const THEME_KEY = 'idtapthat_theme';
+
+// Display order of the theme picker. `preview` is an inline SVG thumbnail;
+// themes without one get a generic mock-up built from `palette`.
+const THEMES = [
+  { id: 'default', name: 'Classic', tagline: 'The original midnight look',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><radialGradient id="tp-default-g" cx=".5" cy="0" r=".9"><stop offset="0" stop-color="#1a0a30"/><stop offset="1" stop-color="#0b0b14"/></radialGradient><linearGradient id="tp-default-b"><stop offset="0" stop-color="#e94560"/><stop offset="1" stop-color="#ff6b35"/></linearGradient></defs><rect width="120" height="80" fill="url(#tp-default-g)"/><rect x="28" y="14" width="22" height="31" rx="3" fill="#13132a" stroke="#2a2a44"/><rect x="62" y="18" width="22" height="31" rx="3" fill="#1a1a2e" stroke="#ffd700" transform="rotate(90 73 33.5)"/><circle cx="73" cy="33.5" r="4" fill="#4ecdc4"/><rect x="22" y="58" width="76" height="11" rx="5" fill="url(#tp-default-b)"/></svg>` },
+  { id: 'fantasy', name: 'Fantasy', tagline: 'Gold leaf, elder kingdoms',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><radialGradient id="tp-fantasy-g" cx=".5" cy="0" r=".9"><stop offset="0" stop-color="#263a20"/><stop offset="1" stop-color="#0e1810"/></radialGradient><linearGradient id="tp-fantasy-b"><stop offset="0" stop-color="#d4a838"/><stop offset="1" stop-color="#f0d585"/></linearGradient></defs><rect width="120" height="80" fill="url(#tp-fantasy-g)"/><path d="M0 54L18 46 34 52 52 42 70 50 90 40 120 50V80H0z" fill="#162318"/><path d="M40 52V30l-3-4h4v-4h3v4h4v-4h3v4h4l-3 4v6h6V28l-2-3h3v-6l4-8 4 8v6h3l-2 3v24z" fill="#1d2d1f" stroke="#d4a838" stroke-width=".8"/><rect x="65" y="34" width="2.4" height="4" rx="1.2" fill="#f2d27a"/><path d="M94 12l1.5 4.5 4.5 1.5-4.5 1.5-1.5 4.5-1.5-4.5-4.5-1.5 4.5-1.5z" fill="#f2d27a"/><rect x="22" y="60" width="76" height="11" rx="4" fill="url(#tp-fantasy-b)"/><rect x="24" y="62" width="72" height="7" rx="3" fill="none" stroke="#1c1405" stroke-opacity=".3" stroke-width=".6"/></svg>` },
+  { id: 'gothic', name: 'Gothic', tagline: 'Cathedral by candlelight',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><linearGradient id="tp-gothic-w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c4183a"/><stop offset="1" stop-color="#5e1d73"/></linearGradient><linearGradient id="tp-gothic-b"><stop offset="0" stop-color="#c4183a"/><stop offset="1" stop-color="#5e1d73"/></linearGradient></defs><rect width="120" height="80" fill="#0a070b"/><ellipse cx="60" cy="0" rx="60" ry="40" fill="#2c0818" opacity=".7"/><path d="M44 52V26Q44 10 60 4Q76 10 76 26V52z" fill="#150d14" stroke="#cfc8d6" stroke-opacity=".6"/><path d="M48 50V27Q48 15 60 9Q72 15 72 27V50z" fill="url(#tp-gothic-w)" opacity=".85"/><path d="M60 9V50M48 30H72M48 40H72" stroke="#0a070b" stroke-width="1.4"/><circle cx="60" cy="21" r="5" fill="none" stroke="#0a070b" stroke-width="1.4"/><rect x="22" y="60" width="76" height="11" fill="url(#tp-gothic-b)"/></svg>` },
+  { id: 'angel', name: 'Angel', tagline: 'Pearl, halo and sky',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><radialGradient id="tp-angel-g" cx=".5" cy=".3" r=".7"><stop offset="0" stop-color="#fff3d1"/><stop offset="1" stop-color="#f8f4ea"/></radialGradient><linearGradient id="tp-angel-b"><stop offset="0" stop-color="#a57620"/><stop offset="1" stop-color="#e6c97e"/></linearGradient></defs><rect width="120" height="80" fill="url(#tp-angel-g)"/><g stroke="#e6c97e" stroke-width="1.2" opacity=".7"><path d="M60 26L60 2M60 26L40 6M60 26L80 6M60 26L28 18M60 26L92 18"/></g><ellipse cx="60" cy="16" rx="11" ry="3.5" fill="none" stroke="#a57620" stroke-width="1.6"/><path d="M57 34C46 24 32 26 22 32c8 0 12 2 16 5-6 0-9 2-12 5 8-2 14-1 19 2-3 1-5 3-6 5 8-3 15-6 18-15z" fill="#fffdf7" stroke="#dcd1b9"/><path d="M63 34c11-10 25-8 35-2-8 0-12 2-16 5 6 0 9 2 12 5-8-2-14-1-19 2 3 1 5 3 6 5-8-3-15-6-18-15z" fill="#fffdf7" stroke="#dcd1b9"/><rect x="22" y="60" width="76" height="11" rx="5.5" fill="url(#tp-angel-b)"/><circle cx="96" cy="12" r="3" fill="#3d75b0" opacity=".5"/></svg>` },
+  { id: 'fire', name: 'Fire', tagline: 'Embers and molten rage',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><linearGradient id="tp-fire-f" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#e0301a"/><stop offset=".6" stop-color="#ff7a1f"/><stop offset="1" stop-color="#ffd34a"/></linearGradient><linearGradient id="tp-fire-b"><stop offset="0" stop-color="#ff5a1f"/><stop offset="1" stop-color="#ffb627"/></linearGradient></defs><rect width="120" height="80" fill="#120806"/><ellipse cx="60" cy="56" rx="60" ry="18" fill="#3d0f04"/><path d="M60 52c-14 0-20-9-16-19 2 5 5 6 7 6-3-9 2-20 11-27-1 8 3 12 7 16 2-3 2-6 1-9 7 6 10 15 6 24-2 6-8 9-16 9z" fill="url(#tp-fire-f)"/><path d="M60 52c-6 0-9-4-7-9 1 2 3 3 4 3-1-5 2-9 5-12 0 4 2 6 4 8 2 4 0 10-6 10z" fill="#ffd34a"/><g fill="#ffb627"><circle cx="34" cy="20" r="1.2"/><circle cx="86" cy="14" r="1"/><circle cx="92" cy="30" r="1.4"/><circle cx="28" cy="36" r=".9"/></g><rect x="22" y="60" width="76" height="11" rx="5" fill="url(#tp-fire-b)"/></svg>` },
+  { id: 'ice', name: 'Ice', tagline: 'Glacier frost, arctic night',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><radialGradient id="tp-ice-g" cx=".5" cy="0" r=".9"><stop offset="0" stop-color="#0f3350"/><stop offset="1" stop-color="#07121f"/></radialGradient><linearGradient id="tp-ice-b"><stop offset="0" stop-color="#5fd3f3"/><stop offset="1" stop-color="#d2f5ff"/></linearGradient></defs><rect width="120" height="80" fill="url(#tp-ice-g)"/><path d="M0 56L14 40 22 50 30 34 40 56zM84 56L94 38 102 48 110 30 120 44V56z" fill="#12253b" stroke="#5fd3f3" stroke-opacity=".5" stroke-width=".7"/><g stroke="#e8f6fc" stroke-width="1.6" stroke-linecap="round"><path d="M60 10V46M44.4 19L75.6 37M44.4 37L75.6 19"/><path d="M55 13L60 18 65 13M55 43L60 38 65 43M45 25L52 24 49 18M75 31L68 32 71 38M45 31L52 32 49 38M75 25L68 24 71 18" stroke-width="1.1"/></g><rect x="22" y="60" width="76" height="11" rx="3" fill="url(#tp-ice-b)"/></svg>` },
+  { id: 'nature', name: 'Nature', tagline: 'Moss, bark and sunlight',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><radialGradient id="tp-nature-s" cx=".85" cy="0" r=".8"><stop offset="0" stop-color="#f0c04a" stop-opacity=".35"/><stop offset="1" stop-color="#0c140b" stop-opacity="0"/></radialGradient><linearGradient id="tp-nature-b"><stop offset="0" stop-color="#7cc04a"/><stop offset="1" stop-color="#e0b23c"/></linearGradient></defs><rect width="120" height="80" fill="#0c140b"/><rect width="120" height="80" fill="url(#tp-nature-s)"/><path d="M57 56V36l-8-8M60 40l9-10M60 46l-6-5" stroke="#6b4a2b" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M54 56h12" stroke="#6b4a2b" stroke-width="4"/><g fill="#7cc04a"><ellipse cx="60" cy="22" rx="18" ry="13"/><ellipse cx="44" cy="30" rx="10" ry="8" fill="#5aa83a"/><ellipse cx="76" cy="28" rx="11" ry="8" fill="#5aa83a"/></g><path d="M18 46q6-10 14-4-6 10-14 4zM96 44q8-6 12 2-8 6-12-2z" fill="#95d462"/><rect x="22" y="60" width="76" height="11" rx="5.5" fill="url(#tp-nature-b)"/></svg>` },
+  { id: 'arcane', name: 'Arcane', tagline: 'Starlight from the void',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><radialGradient id="tp-arcane-o" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ece8ff"/><stop offset=".35" stop-color="#9670ff"/><stop offset="1" stop-color="#26104d" stop-opacity="0"/></radialGradient><linearGradient id="tp-arcane-b"><stop offset="0" stop-color="#7c4dff"/><stop offset="1" stop-color="#c03fe0"/></linearGradient></defs><rect width="120" height="80" fill="#08061a"/><g fill="#ece8ff"><circle cx="14" cy="12" r=".9"/><circle cx="104" cy="8" r="1.1"/><circle cx="96" cy="44" r=".7"/><circle cx="20" cy="48" r=".8"/><circle cx="36" cy="6" r=".6"/></g><circle cx="60" cy="30" r="22" fill="url(#tp-arcane-o)"/><ellipse cx="60" cy="30" rx="30" ry="8" fill="none" stroke="#5ee6e0" stroke-opacity=".7" transform="rotate(-18 60 30)"/><path d="M88 22l1 3 3 1-3 1-1 3-1-3-3-1 3-1z" fill="#ffd970"/><rect x="22" y="60" width="76" height="11" rx="5.5" fill="url(#tp-arcane-b)"/></svg>` },
+  { id: 'abyss', name: 'Abyss', tagline: 'Depths where krakens sleep',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><linearGradient id="tp-abyss-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#06374a"/><stop offset="1" stop-color="#03121a"/></linearGradient><linearGradient id="tp-abyss-b"><stop offset="0" stop-color="#1fb5c4"/><stop offset="1" stop-color="#6fd68a"/></linearGradient></defs><rect width="120" height="80" fill="url(#tp-abyss-g)"/><path d="M0 10q15-6 30 0t30 0 30 0 30 0" fill="none" stroke="#1fb5c4" stroke-opacity=".35"/><g fill="none" stroke="#1fb5c4" stroke-width="3.2" stroke-linecap="round"><path d="M38 56c-4-10 6-14 2-24s6-10 8-4"/><path d="M60 56c0-12-8-16-2-26 4-6 10-2 8 3"/><path d="M82 56c4-10-6-14-2-22s-4-12-9-6"/></g><g fill="#8ef0b5" fill-opacity=".6"><circle cx="24" cy="30" r="1.6"/><circle cx="27" cy="22" r="1"/><circle cx="96" cy="26" r="1.3"/></g><circle cx="104" cy="52" r="2.4" fill="#f4d06f"/><rect x="22" y="60" width="76" height="11" rx="5" fill="url(#tp-abyss-b)"/></svg>` },
+  { id: 'desert', name: 'Desert', tagline: 'Sun-bleached sandstone sands',
+    preview: `<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80"><defs><linearGradient id="tp-desert-b"><stop offset="0" stop-color="#b0502a"/><stop offset="1" stop-color="#c8752c"/></linearGradient></defs><rect width="120" height="80" fill="#f1e3c8"/><circle cx="92" cy="16" r="9" fill="#fff3d6" stroke="#e6c48a"/><path d="M0 50q30-14 60-4t60-8V80H0z" fill="#ead8b6"/><path d="M30 52L48 22 66 52z" fill="#d5bd95"/><path d="M48 22L66 52H52z" fill="#c8a574"/><path d="M64 52L76 32 88 52z" fill="#d5bd95"/><path d="M76 32L88 52H79z" fill="#c8a574"/><path d="M0 58q40-8 120-2" fill="none" stroke="#b0502a" stroke-opacity=".25"/><rect x="22" y="60" width="76" height="11" rx="3" fill="url(#tp-desert-b)"/></svg>` },
+  { id: 'daylight',  name: 'Daylight',     tagline: 'Clean and bright',
+    palette: { bg:'#f3f4f8', surface:'#ffffff', accent:'#d6334f', gold:'#a86f00', teal:'#127a73', text:'#1b1d29', border:'#d3d6e2', glow:'#ffe3e8' } },
+  { id: 'synthwave', name: 'Synthwave',    tagline: 'Neon grid nights',
+    palette: { bg:'#120424', surface:'#1d0938', accent:'#ff2bd6', gold:'#ffd23f', teal:'#2de2e6', text:'#f7eaff', border:'#3d1c66', glow:'#4a0d5e' } },
+  { id: 'slate',     name: 'Slate',        tagline: 'Calm and muted',
+    palette: { bg:'#121417', surface:'#1b1e23', accent:'#8fa3bf', gold:'#e2c98f', teal:'#8fc1b5', text:'#e6e8eb', border:'#2e333b', glow:'#1f242c' } },
+];
+
+let currentTheme = 'default';
+
+function genericThemePreview(c) {
+  return `<svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="120" height="80" fill="${c.bg}"/>
+    <ellipse cx="60" cy="0" rx="70" ry="40" fill="${c.glow}" opacity=".8"/>
+    <rect x="30" y="10" width="60" height="7" rx="3.5" fill="${c.accent}"/>
+    <rect x="14" y="26" width="42" height="34" rx="5" fill="${c.surface}" stroke="${c.border}"/>
+    <rect x="64" y="26" width="42" height="34" rx="5" fill="${c.surface}" stroke="${c.border}"/>
+    <rect x="21" y="34" width="20" height="4" rx="2" fill="${c.text}" opacity=".85"/>
+    <rect x="21" y="42" width="28" height="3" rx="1.5" fill="${c.teal}" opacity=".8"/>
+    <rect x="71" y="34" width="20" height="4" rx="2" fill="${c.text}" opacity=".85"/>
+    <rect x="71" y="42" width="28" height="3" rx="1.5" fill="${c.gold}" opacity=".8"/>
+    <rect x="14" y="66" width="92" height="8" rx="4" fill="${c.accent}"/>
+  </svg>`;
+}
+
+function applyTheme(id) {
+  if (!THEMES.some(t => t.id === id)) id = 'default';
+  currentTheme = id;
+  if (id === 'default') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = id;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  const color = getComputedStyle(document.documentElement).getPropertyValue('--meta-color').trim();
+  if (meta && color) meta.setAttribute('content', color);
+  document.querySelectorAll('.theme-tile').forEach(b =>
+    b.setAttribute('aria-checked', String(b.dataset.theme === id)));
+  try { localStorage.setItem(THEME_KEY, id); } catch(e) {}
+  if (G && G.over && !document.getElementById('end-screen').classList.contains('hidden')) drawChart();
+}
+
+function renderThemeGrid() {
+  const grid = document.getElementById('theme-grid');
+  grid.innerHTML = THEMES.map(t => `
+    <button class="theme-tile" role="radio" data-theme="${t.id}" aria-checked="${t.id === currentTheme}"
+            aria-label="${t.name} theme: ${t.tagline}">
+      <span class="theme-preview">${t.preview || genericThemePreview(t.palette)}</span>
+      <span class="theme-name">${t.name}</span>
+      <span class="theme-tag">${t.tagline}</span>
+    </button>`).join('');
+  grid.querySelectorAll('.theme-tile').forEach(b => b.addEventListener('click', () => {
+    applyTheme(b.dataset.theme);
+    ariaAnnounce(`${b.querySelector('.theme-name').textContent} theme selected`);
+  }));
+}
+
+function openOptions() {
+  renderThemeGrid();
+  document.getElementById('options-modal').classList.remove('hidden');
+  const sel = document.querySelector('.theme-tile[aria-checked="true"]') || document.querySelector('.theme-tile');
+  if (sel) sel.focus();
+}
+
+function closeOptions() {
+  document.getElementById('options-modal').classList.add('hidden');
 }
 
 /* ============================================================
@@ -1938,8 +2458,8 @@ function renderTMM() {
       actEl.innerHTML = `
         <div style="color:var(--gold);font-size:1.15rem;font-weight:800;text-align:center">🏆 Tournament Complete!</div>
         <div style="color:var(--text);text-align:center;margin-top:.4rem">Champion: <strong style="color:${champ.color}">${escapeHtml(champ.name)}</strong> (${champ.points} pts)</div>
-        <button class="start-btn" style="max-width:300px;margin-top:.75rem;background:linear-gradient(90deg,var(--gold),#ff6b35);box-shadow:0 4px 20px rgba(255,215,0,.4);color:#1a1200" id="tourn-congrats-btn" aria-label="Celebrate the champion">🎉 Congratulations</button>
-        <button class="start-btn" style="max-width:300px;margin-top:.6rem;background:rgba(255,255,255,.06);border:1px solid var(--border);box-shadow:none;color:var(--muted)" id="tourn-end-btn" aria-label="End tournament and return to mode select">Finish & Return to Mode Select</button>`;
+        <button class="start-btn" style="max-width:300px;margin-top:.75rem;background:linear-gradient(90deg,var(--gold),var(--accent-end));box-shadow:0 4px 20px rgba(var(--gold-rgb),.4);color:#1a1200" id="tourn-congrats-btn" aria-label="Celebrate the champion">🎉 Congratulations</button>
+        <button class="start-btn" style="max-width:300px;margin-top:.6rem;background:rgba(var(--tint-rgb),.06);border:1px solid var(--border);box-shadow:none;color:var(--muted)" id="tourn-end-btn" aria-label="End tournament and return to mode select">Finish & Return to Mode Select</button>`;
       document.getElementById('tourn-congrats-btn').addEventListener('click', () => {
         celebrateChampion(champ.name, champ.color);
       });
@@ -1973,9 +2493,10 @@ function handleGameKeys(e) {
   const modOpen = !document.getElementById('cdr-modal').classList.contains('hidden')
     || !document.getElementById('poison-modal').classList.contains('hidden')
     || !document.getElementById('amount-modal').classList.contains('hidden')
-    || !document.getElementById('menu-modal').classList.contains('hidden');
+    || !document.getElementById('menu-modal').classList.contains('hidden')
+    || !document.getElementById('options-modal').classList.contains('hidden');
   if (e.key === 'Escape') {
-    closeCdrModal(); closePoisonModal(); closeAmountModal(); closeMenu();
+    closeCdrModal(); closePoisonModal(); closeAmountModal(); closeMenu(); closeOptions();
     return;
   }
   if (modOpen) return;
@@ -2677,7 +3198,7 @@ function renderPoisonBody(tIdx) {
     </p>
     <div style="display:flex;align-items:center;gap:1.2rem;justify-content:center;margin:.75rem 0;">
       <button class="cdr-btn" id="p-dec" style="width:44px;height:44px;font-size:1.3rem;">−</button>
-      <span id="p-big" style="font-size:3rem;font-weight:900;color:${p.poison>=10?'#7fff00':'#fff'}">${p.poison}</span>
+      <span id="p-big" style="font-size:3rem;font-weight:900;color:${p.poison>=10?'#7fff00':'var(--text)'}">${p.poison}</span>
       <button class="cdr-btn" id="p-inc" style="width:44px;height:44px;font-size:1.3rem;">+</button>
     </div>
     ${p.poison >= 10 ? '<p style="color:#7fff00;text-align:center;font-weight:700;margin-bottom:.5rem;">☠️ POISONED OUT</p>' : ''}
@@ -2824,12 +3345,22 @@ function drawChart() {
   const PW = W - PAD.left - PAD.right;
   const PH = H - PAD.top  - PAD.bottom;
 
+  const css  = getComputedStyle(document.documentElement);
+  const tok  = name => css.getPropertyValue(name).trim();
+  const tint = tok('--tint-rgb') || '255,255,255';
+  const C = {
+    bg:    tok('--bg') || '#0b0b14',
+    label: tok('--muted') || '#555',
+    axis:  tok('--border') || C.axis,
+    zero:  `rgba(${tok('--accent-rgb') || '233,69,96'},.35)`,
+  };
+
   ctx.clearRect(0, 0, W, H);
-  ctx.fillStyle = '#0b0b14';
+  ctx.fillStyle = C.bg;
   ctx.fillRect(0, 0, W, H);
 
   if (hist.length < 2) {
-    ctx.fillStyle = '#555';
+    ctx.fillStyle = C.label;
     ctx.font = '14px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('No life changes recorded yet.', W/2, H/2);
@@ -2854,17 +3385,17 @@ function drawChart() {
     const ratio = g / GRID_Y;
     const val   = Math.round(maxL - ratio * (maxL - minL));
     const y     = PAD.top + ratio * PH;
-    ctx.strokeStyle = 'rgba(255,255,255,0.055)';
+    ctx.strokeStyle = `rgba(${tint},0.055)`;
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(PAD.left, y); ctx.lineTo(W - PAD.right, y); ctx.stroke();
-    ctx.fillStyle = '#555';
+    ctx.fillStyle = C.label;
     ctx.fillText(val, PAD.left - 5, y + 3.5);
   }
 
   // --- zero line ---
   if (minL < 0 && maxL > 0) {
     const zy = toY(0);
-    ctx.strokeStyle = 'rgba(233,69,96,.35)';
+    ctx.strokeStyle = C.zero;
     ctx.lineWidth = 1;
     ctx.setLineDash([5, 4]);
     ctx.beginPath(); ctx.moveTo(PAD.left, zy); ctx.lineTo(W - PAD.right, zy); ctx.stroke();
@@ -2874,19 +3405,19 @@ function drawChart() {
   // --- x-axis time labels (6 evenly-spaced ticks) ---
   const TICKS = Math.min(6, hist.length);
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#555';
+  ctx.fillStyle = C.label;
   ctx.font = '10px sans-serif';
   for (let t = 0; t <= TICKS; t++) {
     const sec = tMin + (t / TICKS) * tSpan;
     const x   = toX(sec);
     ctx.fillText(fmtTime(Math.round(sec)), x, H - PAD.bottom + 14);
-    ctx.strokeStyle = 'rgba(255,255,255,.1)';
+    ctx.strokeStyle = `rgba(${tint},.1)`;
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(x, PAD.top + PH); ctx.lineTo(x, PAD.top + PH + 4); ctx.stroke();
   }
 
   // --- axes ---
-  ctx.strokeStyle = '#363660';
+  ctx.strokeStyle = C.axis;
   ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(PAD.left, PAD.top);
@@ -2898,7 +3429,7 @@ function drawChart() {
   ctx.save();
   ctx.translate(10, PAD.top + PH / 2);
   ctx.rotate(-Math.PI / 2);
-  ctx.fillStyle = '#555';
+  ctx.fillStyle = C.label;
   ctx.font = '10px sans-serif';
   ctx.textAlign = 'center';
   ctx.fillText('Life', 0, 0);
@@ -3037,6 +3568,9 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.hc-toggle-btn').forEach(b => b.setAttribute('aria-pressed','true'));
     }
   } catch(e) {}
+  let savedTheme = 'default';
+  try { savedTheme = localStorage.getItem(THEME_KEY) || 'default'; } catch(e) {}
+  applyTheme(savedTheme);
 
   // Mode select
   document.getElementById('mode-play-btn').addEventListener('click', () => {
@@ -3054,6 +3588,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sound & high-contrast toggles (all screens)
   document.querySelectorAll('.sound-toggle-btn').forEach(b => b.addEventListener('click', toggleSound));
   document.querySelectorAll('.hc-toggle-btn').forEach(b => b.addEventListener('click', toggleHighContrast));
+  document.querySelectorAll('.options-btn').forEach(b => b.addEventListener('click', openOptions));
+  document.getElementById('options-close').addEventListener('click', closeOptions);
 
   // Tournament Management screen
   document.getElementById('tourn-launch-btn').addEventListener('click', launchTournament);
@@ -3160,6 +3696,14 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('champion-modal-close').addEventListener('click', closeChampionModal);
   document.getElementById('champion-modal').addEventListener('click', e => {
     if (e.target === document.getElementById('champion-modal')) closeChampionModal();
+  });
+
+  // Options modal
+  document.getElementById('options-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('options-modal')) closeOptions();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !document.getElementById('options-modal').classList.contains('hidden')) closeOptions();
   });
 
   // Keyboard shortcuts

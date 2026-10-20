@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theme Gallery</title>
+<link rel="stylesheet" href="themes.css">
+<style>
+  /* Gallery chrome is neutral and independent of the themes. */
+  html[data-gallery] { background: #111; }
+  body { margin: 0; padding: 24px 16px 48px; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background: #111; color: #ddd; }
+  h1 { font-size: 1.3rem; margin: 0 0 4px; }
+  .lead { color: #999; font-size: .9rem; margin: 0 0 20px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+  .theme {
+    background: var(--bg); background-image: radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, transparent 70%), var(--bg-image);
+    color: var(--text); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; display: flex; flex-direction: column; gap: 12px; overflow: hidden;
+  }
+  .thumb { width: 100%; aspect-ratio: 3/2; border-radius: calc(var(--radius) * .6); overflow: hidden; border: 1px solid var(--border); }
+  .thumb svg { display: block; width: 100%; height: 100%; }
+  .logo { font-family: var(--font-display); font-weight: 900; font-size: 1.6rem; letter-spacing: .05em;
+    background: var(--logo-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 12px var(--logo-glow)); }
+  .tag { color: var(--muted); font-size: .82rem; margin-top: -8px; }
+  .card { background: rgba(var(--tint-rgb), .05); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; display: grid; gap: 8px; }
+  .card h3 { margin: 0; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; }
+  .opt { flex: 1; padding: 6px; border: 2px solid var(--border); border-radius: 9px; background: transparent; color: var(--text); font: 600 .85rem system-ui; }
+  .opt.sel { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .opt.set { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+  .start { padding: 10px; border: 0; border-radius: var(--radius); font: 800 .95rem system-ui; letter-spacing: .07em; text-transform: uppercase;
+    background: linear-gradient(90deg, var(--accent), var(--accent-end)); color: var(--on-accent); box-shadow: 0 4px 20px rgba(var(--accent-rgb), .4); }
+  .chips { display: flex; gap: 8px; font-size: .8rem; }
+  .chips span { padding: 2px 8px; border-radius: 99px; }
+  .win { color: var(--gold); background: rgba(var(--gold-rgb), .12); }
+  .heal { color: var(--teal); background: rgba(var(--teal-rgb), .12); }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px; font-size: .85rem;
+    box-shadow: 0 0 0 6px rgba(var(--scrim-rgb), .82); margin: 6px; }
+  .modal small { color: var(--muted); }
+  .sw { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px 4px; }
+  .sw div { aspect-ratio: 1; border-radius: 4px; border: 1px solid rgba(128,128,128,.35); position: relative; }
+  .sw div::after { content: attr(data-k); position: absolute; left: 0; right: 0; bottom: -14px; font: 9px system-ui; color: var(--muted); text-align: center; }
+  .sw { margin-bottom: 14px; }
+</style>
+</head>
+<body>
+<h1>I'd Tap That: theme gallery</h1>
+<p class="lead">Each card is rendered with that theme's tokens from themes.css. Thumbnails come from previews.js.</p>
+<div class="grid" id="grid"></div>
+<script src="previews.js"></script>
+<script>
+  const TOKENS = ['--bg','--surface','--surface2','--accent','--accent-rgb','--accent-hover','--accent2','--accent-end','--gold','--gold-rgb',
+    '--teal','--teal-rgb','--text','--muted','--border','--border-hover','--on-accent','--tint-rgb','--scrim-rgb','--bg-glow','--bg-image',
+    '--logo-grad','--logo-glow','--font-display','--radius','--meta-color'];
+  const SW = ['bg','surface','surface2','accent','accent2','accent-end','gold','teal','text','muted','border','on-accent'];
+  const root = document.documentElement, grid = document.getElementById('grid');
+  for (const { id, name, tagline } of window.THEME_META) {
+    root.dataset.theme = id;
+    const cs = getComputedStyle(root);
+    const el = document.createElement('section');
+    el.className = 'theme';
+    for (const t of TOKENS) el.style.setProperty(t, cs.getPropertyValue(t).trim());
+    el.innerHTML = `
+      <div class="thumb">${window.THEME_PREVIEWS[id] || ''}</div>
+      <div class="logo">${name}</div>
+      <div class="tag">${tagline} · <code>${id}</code></div>
+      <div class="card"><h3>Starting life</h3>
+        <div class="row"><button class="opt">20</button><button class="opt sel">40</button><button class="opt">60</button><button class="opt set">Set</button></div>
+        <div class="chips"><span class="win">Winner</span><span class="heal">+5 heal</span></div>
+      </div>
+      <div class="modal">Modal surface <small>muted helper text</small></div>
+      <button class="start">Start game</button>
+      <div class="sw">${SW.map(k => `<div data-k="${k}" style="background:var(--${k})"></div>`).join('')}</div>`;
+    grid.appendChild(el);
+  }
+  delete root.dataset.theme;
+</script>
+</body>
+</html>
