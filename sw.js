@@ -3,7 +3,7 @@
    Caches all app assets for offline-first PWA support.
    ============================================================ */
 
-const CACHE_NAME = 'idtapthat-v4';
+const CACHE_NAME = 'idtapthat-v5';
 const PRECACHE   = ['/', '/index.html', '/manifest.json', '/sw.js'];
 
 /* Install: precache core assets */

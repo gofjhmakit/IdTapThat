@@ -934,6 +934,71 @@ input  { font-family: inherit; color: var(--text); }
 .tmm-swap-panel.open { display: flex; }
 
 /* ============================================================
+   TMM: BEST-OF-3, MATCH TIMER, DRAFT SEATING, PROJECTOR DISPLAY
+   ============================================================ */
+.pod-score { color: var(--muted); font-weight: 600; }
+.pod-bo3-group { display: flex; flex-direction: column; gap: .3rem; }
+.pod-bo3-group .pod-bo3-name { font-size: .8rem; font-weight: 700; }
+.pod-bo3-group .pod-player-row .pod-player-btn { padding: .35rem .65rem; font-size: .8rem; }
+
+.tmm-timer-card {
+  width: 100%; max-width: 620px;
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
+  gap: .6rem 1.2rem;
+  background: rgba(var(--tint-rgb),.04);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: .75rem 1rem;
+}
+.tmm-timer-clock {
+  font-size: clamp(2rem, 7vw, 2.8rem); font-weight: 900;
+  font-variant-numeric: tabular-nums; min-width: 5ch; text-align: center;
+}
+.tmm-timer-clock.low      { color: var(--gold); }
+.tmm-timer-clock.overtime { color: var(--accent); }
+.tmm-timer-ctrls { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; justify-content: center; }
+.tmm-timer-min-label { display: flex; align-items: center; gap: .35rem; font-size: .78rem; color: var(--muted); }
+.tmm-timer-min { width: 4.4rem; }
+.tmm-tool-btn[aria-pressed="true"] { border-color: var(--accent); }
+
+.tmm-roster-tools { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; margin-top: .75rem; }
+.tmm-seated-note { font-size: .75rem; color: var(--teal); font-weight: 600; }
+
+.seating-box { max-width: 520px; }
+.seat-table { position: relative; width: min(100%, 400px); aspect-ratio: 1; margin: 0 auto .75rem; }
+.seat-table::before {
+  content: ''; position: absolute; inset: 24%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(var(--accent-rgb),.16), rgba(var(--tint-rgb),.03) 70%);
+  border: 2px solid var(--border);
+}
+.seat-chip {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: .1rem;
+  max-width: 28%; text-align: center;
+}
+.seat-num { font-size: .58rem; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+.seat-name {
+  max-width: 100%; padding: .18rem .5rem;
+  border-radius: 999px; border: 2px solid var(--border);
+  background: var(--surface2);
+  font-size: .76rem; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: opacity .1s;
+}
+.seat-table.spinning .seat-name { opacity: .55; }
+.seat-list {
+  columns: 2; column-gap: 1.5rem;
+  font-size: .82rem; padding-left: 1.6rem; margin-bottom: 1rem;
+}
+.seat-list li { padding: .12rem 0; }
+.seating-actions { display: flex; gap: .6rem; justify-content: center; align-items: center; flex-wrap: wrap; }
+
+#tmm-display-frame-wrap { position: fixed; inset: 0; z-index: 400; background: var(--bg); }
+#tmm-display-frame-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+#tmm-display-close { position: absolute; bottom: .6rem; right: .6rem; z-index: 1; opacity: .35; transition: opacity .2s; }
+#tmm-display-close:hover, #tmm-display-close:focus-visible { opacity: 1; }
+
+/* ============================================================
    CHAMPION CELEBRATION (confetti + modal)
    ============================================================ */
 #confetti-layer {
@@ -1639,6 +1704,21 @@ input  { font-family: inherit; color: var(--text); }
 <!-- ============================================================
      CAREER STATS MODAL
      ============================================================ -->
+<div id="seating-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="seating-modal-title">
+  <div class="modal-box seating-box">
+    <div class="modal-head">
+      <span class="modal-title" id="seating-modal-title">🎲 Draft Seating</span>
+      <button class="modal-close" id="seating-close" aria-label="Close draft seating">✕</button>
+    </div>
+    <div class="seat-table" id="seat-table" aria-hidden="true"></div>
+    <ol class="seat-list" id="seat-list" aria-live="polite"></ol>
+    <div class="seating-actions">
+      <button class="tmm-tool-btn" id="seating-spin-btn">🎲 Spin Again</button>
+      <button class="start-btn" id="seating-apply-btn" style="max-width:240px;padding:.6rem 1rem;font-size:.9rem">✔ Use This Seating</button>
+    </div>
+  </div>
+</div>
+
 <div id="options-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="options-modal-title">
   <div class="modal-box options-box">
     <div class="modal-head">
@@ -1666,6 +1746,7 @@ input  { font-family: inherit; color: var(--text); }
 <div id="tournament-screen" class="screen hidden" aria-label="Tournament management">
   <div class="topbar-controls">
     <button class="util-btn" id="tourn-back-btn" aria-label="Back to mode select" title="Back to mode select" style="margin-right:auto">← Mode Select</button>
+    <button class="util-btn" id="tmm-display-btn" aria-label="Open projector display window" title="Projector display">📺 Display</button>
     <button class="util-btn sound-toggle-btn" id="sound-toggle-tourn" aria-label="Sound on (click to mute)" title="Toggle sound">🔊</button>
     <button class="util-btn options-btn" id="options-btn-tourn" aria-label="Open options" aria-haspopup="dialog" title="Options">⚙️</button>
     <button class="util-btn hc-toggle-btn" id="hc-toggle-tourn" aria-pressed="false" aria-label="Toggle high-contrast mode" title="High contrast">◑</button>
@@ -1681,6 +1762,10 @@ input  { font-family: inherit; color: var(--text); }
       <button class="opt-btn" id="tmm-roster-add-btn" style="flex:0 0 auto;padding:.45rem 1rem;" aria-label="Add player to roster">+ Add</button>
     </div>
     <div class="tmm-roster-list" id="tmm-roster-list"></div>
+    <div class="tmm-roster-tools">
+      <button class="tmm-tool-btn" id="tmm-seating-btn" aria-label="Draw random draft seating" aria-haspopup="dialog">🎲 Draft Seating</button>
+      <span class="tmm-seated-note" id="tmm-seated-note" style="display:none">✔ Seated — round 1 pairs players across the table</span>
+    </div>
   </div>
 
   <!-- Format/Rounds setup (shown before tournament starts) -->
@@ -1694,8 +1779,13 @@ input  { font-family: inherit; color: var(--text); }
       </select>
       <label for="tourn-podsize-sel">Pod Size:</label>
       <select id="tourn-podsize-sel" class="tourn-select" aria-label="Pod size">
-        <option value="4">1v1v1v1 (Commander)</option>
         <option value="2">1v1 (Duel)</option>
+        <option value="4">1v1v1v1 (Commander)</option>
+      </select>
+      <label for="tourn-bestof-sel" id="tourn-bestof-label">Match:</label>
+      <select id="tourn-bestof-sel" class="tourn-select" aria-label="Match length">
+        <option value="1">Best of 1</option>
+        <option value="3">Best of 3</option>
       </select>
       <label for="tourn-rounds-sel" id="tourn-rounds-label">Rounds:</label>
       <select id="tourn-rounds-sel" class="tourn-select" aria-label="Number of rounds">
@@ -1712,11 +1802,23 @@ input  { font-family: inherit; color: var(--text); }
   <div class="tourn-section-label" id="tourn-standings-label" style="display:none">Standings</div>
   <div class="tourn-standings-wrap" id="tourn-standings-wrap" style="display:none">
     <table aria-label="Tournament standings">
-      <thead><tr>
+      <thead><tr id="tourn-standings-head">
         <th>#</th><th>Player</th><th>W</th><th>L</th><th>Pts</th>
       </tr></thead>
       <tbody id="tourn-standings-body"></tbody>
     </table>
+  </div>
+
+  <!-- Optional match timer -->
+  <div class="tmm-timer-card" id="tmm-timer-card" style="display:none" role="group" aria-label="Match timer">
+    <div class="tmm-timer-clock" id="tmm-timer-clock" role="timer" aria-live="off">50:00</div>
+    <div class="tmm-timer-ctrls">
+      <button class="tmm-tool-btn" id="tmm-timer-start-btn" aria-label="Start timer">▶ Start</button>
+      <button class="tmm-tool-btn" id="tmm-timer-reset-btn" aria-label="Reset timer">↺ Reset</button>
+      <label class="tmm-timer-min-label">Minutes
+        <input type="number" id="tmm-timer-min" class="tourn-select tmm-timer-min" min="1" max="180" value="50" aria-label="Round length in minutes">
+      </label>
+    </div>
   </div>
 
   <!-- Current round pairings -->
@@ -1729,6 +1831,7 @@ input  { font-family: inherit; color: var(--text); }
       <button class="tmm-tool-btn" id="tmm-reshuffle-btn" aria-label="Reshuffle unplayed pairings">🔀 Reshuffle Round</button>
       <button class="tmm-tool-btn" id="tmm-swap-toggle-btn" aria-label="Manually swap two players" aria-expanded="false">↔ Manual Swap</button>
       <button class="tmm-tool-btn" id="tmm-print-btn" aria-label="Print current round pairings">🖨 Print Pairings</button>
+      <button class="tmm-tool-btn" id="tmm-timer-toggle-btn" aria-pressed="false" aria-label="Show or hide the match timer">⏱ Match Timer</button>
     </div>
     <div class="tmm-swap-panel" id="tmm-swap-panel">
       <label for="tmm-swap-a" style="font-size:.8rem;color:var(--muted)">Swap</label>
@@ -1975,6 +2078,7 @@ function applyTheme(id) {
     b.setAttribute('aria-checked', String(b.dataset.theme === id)));
   try { localStorage.setItem(THEME_KEY, id); } catch(e) {}
   if (G && G.over && !document.getElementById('end-screen').classList.contains('hidden')) drawChart();
+  updateDisplay();
 }
 
 function renderThemeGrid() {
@@ -2127,6 +2231,7 @@ function loadTournamentState() {
 
 let TOURNAMENT = loadTournamentState();  // always either null or an already-started tournament
 let tmmRosterDraft = [];
+let tmmRosterSeated = false;  // roster order is a drawn draft seating (round 1 pairs across the table)
 
 function saveTournamentState() {
   try {
@@ -2140,32 +2245,74 @@ function clearTournamentState() {
   try { localStorage.removeItem(TMM_KEY); } catch(e) {}
 }
 
-function createTournament(players, format, numRounds, podSize) {
+function createTournament(players, format, numRounds, podSize, bestOf) {
+  podSize = podSize || 4;
   return {
-    format, numRounds, podSize: podSize || 4,
+    format, numRounds, podSize,
+    bestOf: podSize === 2 && bestOf === 3 ? 3 : 1,
+    seated: false,
     currentRound: 1,
     started: false,
     players: players.map(p => ({ name: p.name, color: p.color })),
-    rounds: [],  // rounds[i] = tables; table = {playerIndices, result:null|{placement:[...]}, bye:bool}
+    rounds: [],  // rounds[i] = tables; table = {playerIndices, result:null|{placement:[...], games?:[w,l]}, bye:bool}
+    timer: defaultMatchTimer(50),
   };
+}
+
+function isBestOf3() {
+  return TOURNAMENT?.bestOf === 3 && TOURNAMENT.podSize === 2;
 }
 
 /* ---- Standings are always derived from recorded results, never mutated
    incrementally — this makes "unsetting" a victor trivial and safe:
    just clear table.result and every render recomputes from scratch. ---- */
 function computeStandings() {
-  const stats = TOURNAMENT.players.map((p, i) => ({ ...p, _i: i, wins: 0, losses: 0, points: 0 }));
+  const byeGames = isBestOf3() ? 2 : 1;
+  const stats = TOURNAMENT.players.map((p, i) => ({
+    ...p, _i: i, wins: 0, losses: 0, points: 0,
+    matches: 0, gameWins: 0, gameLosses: 0, opponents: [],
+  }));
   TOURNAMENT.rounds.forEach(tables => tables.forEach(table => {
     if (!table.result) return;
+    const games = table.result.games;  // [winner's games, loser's games] for best-of-3 duels
     table.result.placement.forEach((pIdx, rank) => {
       if (pIdx === undefined) return;
       const s = stats[pIdx];
-      if (rank === 0) { s.wins++; s.points += 3; }
-      else { s.losses++; }
+      s.matches++;
+      if (table.bye) { s.wins++; s.points += 3; s.gameWins += byeGames; return; }
+      table.playerIndices.forEach(o => { if (o !== pIdx) s.opponents.push(o); });
+      if (rank === 0) {
+        s.wins++; s.points += 3;
+        s.gameWins += games ? games[0] : 1; s.gameLosses += games ? games[1] : 0;
+      } else {
+        s.losses++;
+        s.gameWins += games ? games[1] : 0; s.gameLosses += games ? games[0] : 1;
+      }
     });
   }));
+  // Tiebreakers as in MTG tournament rules: match-win % and game-win % floor at 33%,
+  // byes count as wins for the player but are never anyone's opponent.
+  const pct = (n, d) => d ? Math.max(1 / 3, n / d) : 0;
+  const avg = xs => xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0;
+  stats.forEach(s => {
+    s.mwp = pct(s.points, 3 * s.matches);
+    s.gwp = pct(s.gameWins, s.gameWins + s.gameLosses);
+  });
+  stats.forEach(s => {
+    s.omw = avg(s.opponents.map(o => stats[o].mwp));
+    s.ogw = avg(s.opponents.map(o => stats[o].gwp));
+  });
   return stats;
 }
+
+/* ---- Final ranking: points, then opponents' match-win %, game-win %,
+   opponents' game-win %. Remaining ties keep roster order. ---- */
+function rankStandings(stats) {
+  return [...stats].sort((a, b) =>
+    b.points - a.points || b.omw - a.omw || b.gwp - a.gwp || b.ogw - a.ogw || a._i - b._i);
+}
+
+function fmtPct(x) { return Math.round(x * 100) + '%'; }
 
 function playerHadBye(idx) {
   return TOURNAMENT.rounds.some(tables => tables.some(t => t.bye && t.playerIndices[0] === idx));
@@ -2200,19 +2347,78 @@ function chunkPodsWithBye(orderedIdx, podSize) {
   return tables;
 }
 
-function generateSwissPods() {
+/* ---- Draft seating: round 1 pairs each seat with the player directly
+   across the table (seat i vs seat i + n/2). The roster is already in seat
+   order; with an odd count the last seat takes the bye. ---- */
+function crossTableOrder(n) {
+  const half = Math.floor(n / 2);
+  const order = [];
+  for (let i = 0; i < half; i++) order.push(i, i + half);
+  if (n % 2) order.push(n - 1);
+  return order;
+}
+
+function useSeatingForThisRound(opts) {
+  return TOURNAMENT.seated && TOURNAMENT.podSize === 2
+    && TOURNAMENT.currentRound === 1 && !(opts && opts.reshuffle);
+}
+
+/* ---- Pairs already played in earlier rounds (as "a-b" keys, both directions). ---- */
+function previousOpponentKeys() {
+  const met = new Set();
+  TOURNAMENT.rounds.slice(0, TOURNAMENT.currentRound - 1).forEach(tables => tables.forEach(t => {
+    if (t.bye) return;
+    t.playerIndices.forEach(a => t.playerIndices.forEach(b => { if (a !== b) met.add(a + '-' + b); }));
+  }));
+  return met;
+}
+
+/* ---- Re-order a standings-sorted list so consecutive pairs are fresh
+   opponents, staying as close to the sorted order as possible. Depth-first
+   with a step budget; if no rematch-free pairing exists, keep the order. ---- */
+function pairAvoidingRematches(order) {
+  const met = previousOpponentKeys();
+  let budget = 50000;
+  const solve = rem => {
+    if (rem.length < 2) return rem;
+    const [a, ...rest] = rem;
+    for (let j = 0; j < rest.length; j++) {
+      if (--budget < 0) return null;
+      if (met.has(a + '-' + rest[j])) continue;
+      const sub = solve(rest.filter((_, k) => k !== j));
+      if (sub) return [a, rest[j], ...sub];
+    }
+    return null;
+  };
+  return solve(order) || order;
+}
+
+function generateSwissPods(opts) {
   const podSize = TOURNAMENT.podSize || 4;
+  if (useSeatingForThisRound(opts)) return chunkPodsWithBye(crossTableOrder(TOURNAMENT.players.length), podSize);
   const stats   = computeStandings();
   const order = TOURNAMENT.players.map((_, i) => i).sort((a, b) => {
     const d = stats[b].points - stats[a].points;
     return d !== 0 ? d : (Math.random() - 0.5);
   });
-  return chunkPodsWithBye(order, podSize);
+  if (podSize !== 2) return chunkPodsWithBye(order, podSize);
+
+  // Duels: settle the bye first (lowest-ranked player without one), then pair the rest.
+  let byeIdx = null;
+  if (order.length % 2) {
+    byeIdx = order[order.length - 1];
+    for (let i = order.length - 1; i >= 0; i--) {
+      if (!playerHadBye(order[i])) { byeIdx = order[i]; break; }
+    }
+  }
+  const paired = pairAvoidingRematches(order.filter(i => i !== byeIdx));
+  return chunkPodsWithBye(byeIdx === null ? paired : [...paired, byeIdx], podSize);
 }
 
-function generateEliminationPods() {
+function generateEliminationPods(opts) {
   const podSize    = TOURNAMENT.podSize || 4;
-  const prevRounds = TOURNAMENT.rounds;
+  const prevRounds = TOURNAMENT.rounds.slice(0, TOURNAMENT.currentRound - 1);
+  if (useSeatingForThisRound(opts)) return chunkPodsWithBye(crossTableOrder(TOURNAMENT.players.length), podSize);
   const eligible = prevRounds.length === 0
     ? TOURNAMENT.players.map((_, i) => i).sort(() => Math.random() - 0.5)
     : prevRounds[prevRounds.length - 1]
@@ -2232,8 +2438,10 @@ function launchTournament() {
   const format    = document.getElementById('tourn-format-sel').value;
   const numRounds = parseInt(document.getElementById('tourn-rounds-sel').value, 10);
   const podSize   = parseInt(document.getElementById('tourn-podsize-sel').value, 10);
+  const bestOf    = parseInt(document.getElementById('tourn-bestof-sel').value, 10);
 
-  TOURNAMENT = createTournament(tmmRosterDraft, format, numRounds, podSize);
+  TOURNAMENT = createTournament(tmmRosterDraft, format, numRounds, podSize, bestOf);
+  TOURNAMENT.seated = tmmRosterSeated && podSize === 2;
   TOURNAMENT.started = true;
   generateNextTournamentRound();
   saveTournamentState();
@@ -2242,15 +2450,18 @@ function launchTournament() {
 }
 
 /* ---- Setting / unsetting a pod's victor ---- */
-function setPodWinner(roundIdx, tableIdx, winnerIdx) {
+/* `loserGames` (best-of-3 only) is the loser's game count: 0 for 2–0, 1 for 2–1. */
+function setPodWinner(roundIdx, tableIdx, winnerIdx, loserGames) {
   const table = TOURNAMENT.rounds[roundIdx][tableIdx];
   if (table.bye || table.result) return;
   const rest = table.playerIndices.filter(i => i !== winnerIdx);
   table.result = { placement: [winnerIdx, ...rest] };
+  if (isBestOf3()) table.result.games = [2, loserGames === 1 ? 1 : 0];
   saveTournamentState();
   renderTMM();
   sfxTurn();
-  ariaAnnounce(`${TOURNAMENT.players[winnerIdx].name} marked winner of table ${tableIdx + 1}.`);
+  const score = table.result.games ? ` ${table.result.games.join('–')}` : '';
+  ariaAnnounce(`${TOURNAMENT.players[winnerIdx].name} marked winner of table ${tableIdx + 1}${score}.`);
 }
 
 function unsetPodResult(roundIdx, tableIdx) {
@@ -2269,7 +2480,8 @@ function reshuffleCurrentRound() {
     alert('This round already has recorded results — unset them first to reshuffle.');
     return;
   }
-  TOURNAMENT.rounds[roundIdx] = TOURNAMENT.format === 'swiss' ? generateSwissPods() : generateEliminationPods();
+  TOURNAMENT.rounds[roundIdx] = TOURNAMENT.format === 'swiss'
+    ? generateSwissPods({ reshuffle: true }) : generateEliminationPods({ reshuffle: true });
   saveTournamentState();
   renderTMM();
   ariaAnnounce('Round pairings reshuffled.');
@@ -2300,11 +2512,12 @@ function printCurrentPairings() {
   const rows = tables.map((t, i) => {
     if (t.bye) return `<div class="print-pod"><strong>Table ${i + 1}:</strong> BYE — ${escapeHtml(TOURNAMENT.players[t.playerIndices[0]].name)}</div>`;
     const names = t.playerIndices.map(pIdx => escapeHtml(TOURNAMENT.players[pIdx].name)).join(' &nbsp;vs&nbsp; ');
-    return `<div class="print-pod"><strong>Table ${i + 1}:</strong> ${names} &nbsp;&nbsp; Winner: ____________________</div>`;
+    const score = isBestOf3() ? ' &nbsp; Score: ___–___' : '';
+    return `<div class="print-pod"><strong>Table ${i + 1}:</strong> ${names} &nbsp;&nbsp; Winner: ____________________${score}</div>`;
   }).join('');
   document.getElementById('print-sheet').innerHTML = `
     <h1>I'd Tap That — Tournament Pairings</h1>
-    <p>${TOURNAMENT.format === 'swiss' ? 'Swiss' : 'Single Elimination'} &middot; Round ${TOURNAMENT.currentRound} &middot; ${escapeHtml(new Date().toLocaleString())}</p>
+    <p>${TOURNAMENT.format === 'swiss' ? 'Swiss' : 'Single Elimination'}${isBestOf3() ? ' &middot; Best of 3' : ''} &middot; Round ${TOURNAMENT.currentRound} &middot; ${escapeHtml(new Date().toLocaleString())}</p>
     ${rows}
   `;
   window.print();
@@ -2313,6 +2526,8 @@ function printCurrentPairings() {
 /* ---- Roster builder (pre-launch) ---- */
 function renderTmmRoster() {
   document.getElementById('tmm-roster-count').textContent = tmmRosterDraft.length;
+  document.getElementById('tmm-seated-note').style.display = tmmRosterSeated ? '' : 'none';
+  document.getElementById('tmm-seating-btn').disabled = tmmRosterDraft.length < 2;
   const list = document.getElementById('tmm-roster-list');
   list.innerHTML = tmmRosterDraft.map((p, i) => `
     <span class="tmm-roster-chip">
@@ -2322,6 +2537,7 @@ function renderTmmRoster() {
   list.querySelectorAll('.tmm-roster-chip-remove').forEach(btn => {
     btn.addEventListener('click', () => {
       tmmRosterDraft.splice(+btn.dataset.i, 1);
+      tmmRosterSeated = false;
       renderTmmRoster();
     });
   });
@@ -2333,6 +2549,7 @@ function addTmmRosterPlayer() {
   if (!name) return;
   const color = PALETTE[tmmRosterDraft.length % PALETTE.length];
   tmmRosterDraft.push({ name, color });
+  tmmRosterSeated = false;
   input.value = '';
   renderTmmRoster();
   input.focus();
@@ -2368,10 +2585,16 @@ function renderTMM() {
     document.getElementById('tourn-pairings').innerHTML = '';
     document.getElementById('tourn-actions').innerHTML = '';
     document.getElementById('tmm-tools-wrap').style.display = 'none';
+    document.getElementById('tmm-timer-card').style.display = 'none';
     const isElim = document.getElementById('tourn-format-sel').value === 'elimination';
     document.getElementById('tourn-rounds-label').style.display = isElim ? 'none' : '';
     document.getElementById('tourn-rounds-sel').style.display  = isElim ? 'none' : '';
+    const isDuel = document.getElementById('tourn-podsize-sel').value === '2';
+    document.getElementById('tourn-bestof-label').style.display = isDuel ? '' : 'none';
+    document.getElementById('tourn-bestof-sel').style.display   = isDuel ? '' : 'none';
     renderTmmRoster();
+    syncMatchTimerTicker();
+    updateDisplay();
     return;
   }
 
@@ -2384,11 +2607,16 @@ function renderTMM() {
   document.getElementById('tourn-pairings-label').style.display = '';
 
   const maxR = TOURNAMENT.format === 'swiss' ? TOURNAMENT.numRounds : '?';
-  roundLabelSub.textContent = `Round ${TOURNAMENT.currentRound}${TOURNAMENT.format === 'swiss' ? ' of ' + maxR : ''}`;
+  roundLabelSub.textContent = `Round ${TOURNAMENT.currentRound}${TOURNAMENT.format === 'swiss' ? ' of ' + maxR : ''}`
+    + (isBestOf3() ? ' · Best of 3' : '');
 
   // Standings
+  const bo3 = isBestOf3();
   const stats = computeStandings();
-  const standSorted = [...stats].sort((a, b) => b.points - a.points || b.wins - a.wins);
+  const standSorted = rankStandings(stats);
+  document.getElementById('tourn-standings-head').innerHTML =
+    `<th>#</th><th>Player</th><th>W</th><th>L</th><th>Pts</th><th title="Opponents' match-win %">OMW</th>`
+    + (bo3 ? `<th title="Game-win %">GW</th><th title="Opponents' game-win %">OGW</th>` : '');
   document.getElementById('tourn-standings-body').innerHTML = standSorted.map((p, rank) => `
     <tr>
       <td>${rank + 1}</td>
@@ -2396,6 +2624,8 @@ function renderTMM() {
       <td style="color:var(--teal)">${p.wins}</td>
       <td style="color:var(--accent)">${p.losses}</td>
       <td style="color:var(--gold);font-weight:700">${p.points}</td>
+      <td style="color:var(--muted)">${fmtPct(p.omw)}</td>
+      ${bo3 ? `<td style="color:var(--muted)">${fmtPct(p.gwp)}</td><td style="color:var(--muted)">${fmtPct(p.ogw)}</td>` : ''}
     </tr>`).join('');
 
   // Pairings
@@ -2426,12 +2656,20 @@ function renderTMM() {
         <div class="pod-players">
           ${players.map(p => `<span style="color:${p.color}">${escapeHtml(p.name)}</span>`).join('<span class="pod-vs">vs</span>')}
         </div>
-        ${!done ? `
+        ${!done && bo3 ? `
+          <div class="pod-player-row" style="margin-top:.6rem;gap:.9rem">
+            ${players.map((p, pi) => `<div class="pod-bo3-group">
+              <span class="pod-bo3-name" style="color:${p.color}">🏆 ${escapeHtml(p.name)} wins</span>
+              <div class="pod-player-row">
+                ${[0, 1].map(lg => `<button class="pod-player-btn" style="border-color:${p.color}" onclick="setPodWinner(${roundIdx},${tIdx},${table.playerIndices[pi]},${lg})" aria-label="${escapeHtml(p.name)} wins table ${tIdx + 1} 2–${lg}">2–${lg}</button>`).join('')}
+              </div>
+            </div>`).join('')}
+          </div>` : !done ? `
           <div class="pod-player-row" style="margin-top:.6rem;">
             ${players.map((p, pi) => `<button class="pod-player-btn" style="border-color:${p.color}" onclick="setPodWinner(${roundIdx},${tIdx},${table.playerIndices[pi]})" aria-label="Mark ${escapeHtml(p.name)} winner of table ${tIdx + 1}">🏆 ${escapeHtml(p.name)}</button>`).join('')}
           </div>` : `
           <div class="pod-winner-line">
-            <span class="pod-winner-note">Winner: <strong style="color:${winnerColor}">${escapeHtml(winnerName)}</strong></span>
+            <span class="pod-winner-note">Winner: <strong style="color:${winnerColor}">${escapeHtml(winnerName)}</strong>${table.result.games ? ` <span class="pod-score">(${table.result.games.join('–')})</span>` : ''}</span>
             <button class="pod-unset-btn" onclick="unsetPodResult(${roundIdx},${tIdx})" aria-label="Unset result for table ${tIdx + 1}">↩ Unset</button>
           </div>`}
       </div>`;
@@ -2454,7 +2692,10 @@ function renderTMM() {
       || (TOURNAMENT.format === 'elimination' && tables.length <= 1);
 
     if (isFinalRound) {
-      const champ = standSorted[0];
+      // Elimination: the final's winner. Swiss: the top of the tiebroken standings.
+      const champ = TOURNAMENT.format === 'elimination'
+        ? stats[tables.find(t => !t.bye)?.result.placement[0] ?? tables[0].playerIndices[0]]
+        : standSorted[0];
       actEl.innerHTML = `
         <div style="color:var(--gold);font-size:1.15rem;font-weight:800;text-align:center">🏆 Tournament Complete!</div>
         <div style="color:var(--text);text-align:center;margin-top:.4rem">Champion: <strong style="color:${champ.color}">${escapeHtml(champ.name)}</strong> (${champ.points} pts)</div>
@@ -2465,6 +2706,8 @@ function renderTMM() {
       });
       document.getElementById('tourn-end-btn').addEventListener('click', () => {
         clearTournamentState();
+        syncMatchTimerTicker();
+        updateDisplay();
         showScreen('mode');
         updateModeScreenTmmHint();
       });
@@ -2472,6 +2715,7 @@ function renderTMM() {
       actEl.innerHTML = `<button class="start-btn" style="max-width:300px" id="tourn-nextrnd-btn" aria-label="Generate next round">Next Round →</button>`;
       document.getElementById('tourn-nextrnd-btn').addEventListener('click', () => {
         TOURNAMENT.currentRound++;
+        resetMatchTimer({ silent: true });
         generateNextTournamentRound();
         renderTMM();
         sfxRound();
@@ -2481,6 +2725,413 @@ function renderTMM() {
   } else {
     actEl.innerHTML = '';
   }
+
+  renderMatchTimer();
+  syncMatchTimerTicker();
+  updateDisplay();
+}
+
+/* ============================================================
+   TMM: MATCH TIMER
+   Counts down from the round length, then counts overtime ("+1:23").
+   Stores an absolute end time while running so a reload doesn't lose it.
+   ============================================================ */
+let matchTimerTickId = null;
+
+function defaultMatchTimer(minutes) {
+  return { enabled: false, minutes, running: false, endsAt: null, remainingMs: minutes * 60000, alarmed: false };
+}
+
+function matchTimer() {
+  if (!TOURNAMENT) return null;
+  if (!TOURNAMENT.timer) TOURNAMENT.timer = defaultMatchTimer(50);  // tournaments saved before the timer existed
+  return TOURNAMENT.timer;
+}
+
+function matchTimerRemaining(tm) {
+  return tm.running ? tm.endsAt - Date.now() : tm.remainingMs;
+}
+
+function fmtClock(ms) {
+  const over = ms < 0;
+  const s = over ? Math.floor(-ms / 1000) : Math.ceil(ms / 1000);
+  return (over ? '+' : '') + Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+function sfxTimeUp() { [0, 260, 520].forEach(d => setTimeout(() => playTone(988, 'square', .18, .16), d)); }
+
+function toggleMatchTimerCard() {
+  const tm = matchTimer();
+  if (!tm) return;
+  tm.enabled = !tm.enabled;
+  if (!tm.enabled && tm.running) startPauseMatchTimer();
+  saveTournamentState();
+  renderMatchTimer();
+  updateDisplay();
+}
+
+function startPauseMatchTimer() {
+  const tm = matchTimer();
+  if (!tm) return;
+  if (tm.running) { tm.remainingMs = tm.endsAt - Date.now(); tm.running = false; tm.endsAt = null; }
+  else { tm.endsAt = Date.now() + tm.remainingMs; tm.running = true; }
+  saveTournamentState();
+  renderMatchTimer();
+  syncMatchTimerTicker();
+  updateDisplay();
+}
+
+function resetMatchTimer(opts) {
+  const tm = matchTimer();
+  if (!tm) return;
+  Object.assign(tm, { running: false, endsAt: null, remainingMs: tm.minutes * 60000, alarmed: false });
+  saveTournamentState();
+  if (opts && opts.silent) return;
+  renderMatchTimer();
+  syncMatchTimerTicker();
+  updateDisplay();
+}
+
+function setMatchTimerMinutes(value) {
+  const tm = matchTimer();
+  const minutes = Math.min(180, Math.max(1, parseInt(value, 10) || 50));
+  if (!tm) return;
+  tm.minutes = minutes;
+  if (!tm.running) { tm.remainingMs = minutes * 60000; tm.alarmed = false; }
+  saveTournamentState();
+  renderMatchTimer();
+  updateDisplay();
+}
+
+function renderMatchTimer() {
+  const tm = matchTimer();
+  const card = document.getElementById('tmm-timer-card');
+  const show = !!(tm && TOURNAMENT.started && tm.enabled);
+  card.style.display = show ? '' : 'none';
+  document.getElementById('tmm-timer-toggle-btn').setAttribute('aria-pressed', String(show));
+  if (!show) return;
+  const ms = matchTimerRemaining(tm);
+  const clock = document.getElementById('tmm-timer-clock');
+  clock.textContent = fmtClock(ms);
+  clock.classList.toggle('overtime', ms < 0);
+  clock.classList.toggle('low', ms >= 0 && ms < 5 * 60000);
+  const btn = document.getElementById('tmm-timer-start-btn');
+  btn.textContent = tm.running ? '⏸ Pause' : '▶ Start';
+  btn.setAttribute('aria-label', tm.running ? 'Pause timer' : 'Start timer');
+  const minInput = document.getElementById('tmm-timer-min');
+  if (document.activeElement !== minInput) minInput.value = tm.minutes;
+}
+
+function onMatchTimerTick() {
+  const tm = matchTimer();
+  if (!tm || !tm.running) { syncMatchTimerTicker(); return; }
+  if (!tm.alarmed && matchTimerRemaining(tm) <= 0) {
+    tm.alarmed = true;
+    saveTournamentState();
+    sfxTimeUp();
+    ariaAnnounce('Time is up for this round.');
+  }
+  renderMatchTimer();
+  updateDisplayTimer();
+}
+
+function syncMatchTimerTicker() {
+  const running = !!(TOURNAMENT && TOURNAMENT.timer && TOURNAMENT.timer.running);
+  if (running && !matchTimerTickId) matchTimerTickId = setInterval(onMatchTimerTick, 250);
+  if (!running && matchTimerTickId) { clearInterval(matchTimerTickId); matchTimerTickId = null; }
+}
+
+/* ============================================================
+   TMM: DRAFT SEATING ROULETTE
+   ============================================================ */
+let seatingDraw = null;      // proposed seat order (indices into tmmRosterDraft)
+let seatingAnimId = null;
+
+function shuffledIndices(n) {
+  const a = Array.from({ length: n }, (_, i) => i);
+  for (let i = n - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderSeatTable(order) {
+  const n = order.length;
+  document.getElementById('seat-table').innerHTML = order.map((pIdx, seat) => {
+    const p = tmmRosterDraft[pIdx];
+    const angle = (seat / n) * 2 * Math.PI - Math.PI / 2;
+    const x = 50 + 40 * Math.cos(angle), y = 50 + 40 * Math.sin(angle);
+    return `<div class="seat-chip" style="left:${x}%;top:${y}%">
+      <span class="seat-num">Seat ${seat + 1}</span>
+      <span class="seat-name" style="border-color:${p.color}">${escapeHtml(p.name)}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderSeatList(order) {
+  document.getElementById('seat-list').innerHTML = order
+    .map(pIdx => `<li>${escapeHtml(tmmRosterDraft[pIdx].name)}</li>`).join('');
+}
+
+function spinSeating() {
+  const n = tmmRosterDraft.length;
+  seatingDraw = shuffledIndices(n);
+  const table = document.getElementById('seat-table');
+  const applyBtn = document.getElementById('seating-apply-btn');
+  clearTimeout(seatingAnimId);
+  document.getElementById('seat-list').innerHTML = '';
+  table.classList.add('spinning');
+  applyBtn.disabled = true;
+  let frames = 16;
+  const step = () => {
+    if (frames-- > 0) {
+      renderSeatTable(shuffledIndices(n));
+      sfxTurn();
+      seatingAnimId = setTimeout(step, 60 + (16 - frames) * 14);
+      return;
+    }
+    table.classList.remove('spinning');
+    applyBtn.disabled = false;
+    renderSeatTable(seatingDraw);
+    renderSeatList(seatingDraw);
+    sfxRound();
+    ariaAnnounce('Seating drawn: ' + seatingDraw.map((i, s) => `seat ${s + 1} ${tmmRosterDraft[i].name}`).join(', '));
+  };
+  step();
+}
+
+function openSeatingModal() {
+  if (tmmRosterDraft.length < 2) { alert('Add at least 2 players to draw seating.'); return; }
+  document.getElementById('seating-modal').classList.remove('hidden');
+  spinSeating();
+}
+
+function closeSeatingModal() {
+  clearTimeout(seatingAnimId);
+  document.getElementById('seating-modal').classList.add('hidden');
+}
+
+function applySeating() {
+  if (!seatingDraw || seatingDraw.length !== tmmRosterDraft.length) return;
+  tmmRosterDraft = seatingDraw.map(i => tmmRosterDraft[i]);
+  tmmRosterSeated = true;
+  seatingDraw = null;
+  closeSeatingModal();
+  renderTmmRoster();
+  updateDisplay();
+}
+
+/* ============================================================
+   TMM: PROJECTOR DISPLAY
+   A separate window (drag it to the projector, resize freely) showing the
+   timer, standings and pairings. Falls back to a full-screen in-page view
+   when popups are blocked (e.g. installed-app mode).
+   ============================================================ */
+const DISPLAY_PREFS_KEY = 'idtapthat_display';
+const DISPLAY_TOKENS = ['--bg', '--surface', '--surface2', '--accent', '--accent-rgb', '--accent-end', '--gold',
+  '--gold-rgb', '--teal', '--teal-rgb', '--text', '--muted', '--border', '--tint-rgb', '--bg-glow', '--bg-image',
+  '--logo-grad', '--font-display', '--radius'];
+let displayWin = null;
+
+function loadDisplayPrefs() {
+  const prefs = { scale: 1, timer: true, standings: true, pairings: true };
+  try { Object.assign(prefs, JSON.parse(localStorage.getItem(DISPLAY_PREFS_KEY) || '{}')); } catch(e) {}
+  return prefs;
+}
+
+function saveDisplayPrefs(prefs) {
+  try { localStorage.setItem(DISPLAY_PREFS_KEY, JSON.stringify(prefs)); } catch(e) {}
+}
+
+const DISPLAY_CSS = `
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: calc(var(--scale, 1) * 1.55vmin); }
+html, body { height: 100%; }
+body {
+  background: var(--bg-image), radial-gradient(ellipse at 50% 0%, var(--bg-glow) 0%, var(--bg) 70%);
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  overflow: auto;
+}
+.d-toolbar {
+  position: fixed; top: .5rem; right: .5rem; z-index: 2;
+  display: flex; gap: 6px; opacity: .2; transition: opacity .2s;
+  font-size: 14px;
+}
+.d-toolbar:hover, .d-toolbar:focus-within { opacity: 1; }
+.d-toolbar button {
+  padding: 5px 9px; border-radius: 7px; cursor: pointer;
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); font: inherit;
+}
+.d-toolbar button[aria-pressed="false"] { opacity: .45; }
+.d-root {
+  display: flex; flex-wrap: wrap; gap: 1.6rem; padding: 2rem 2.4rem;
+  align-items: flex-start;
+}
+.d-root > .d-panel { flex: 1 1 34rem; min-width: 0; }
+.d-head { flex: 1 1 100%; display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.d-title {
+  font-family: var(--font-display); font-weight: 900; font-size: 2.6rem; letter-spacing: .05em;
+  background: var(--logo-grad); -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.d-round { font-size: 1.7rem; color: var(--muted); font-weight: 700; }
+.d-panel {
+  background: rgba(var(--tint-rgb), .05); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1.3rem 1.6rem;
+}
+.d-panel h2 { font-size: 1rem; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); margin-bottom: .8rem; }
+.d-root > .d-timer { flex-basis: 100%; text-align: center; padding: 1rem; }
+.d-clock { font-size: 11rem; line-height: 1; font-weight: 900; font-variant-numeric: tabular-nums; }
+.d-clock.low { color: var(--gold); }
+.d-clock.overtime { color: var(--accent); }
+.d-clock-sub { font-size: 1.5rem; color: var(--muted); margin-top: .4rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.d-clock-sub.overtime { color: var(--accent); }
+table { width: 100%; border-collapse: collapse; font-size: 1.45rem; }
+th { text-align: left; font-size: .9rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; padding: .3rem .5rem; border-bottom: 1px solid var(--border); }
+td { padding: .32rem .5rem; border-bottom: 1px solid rgba(var(--tint-rgb), .06); }
+td.num { font-variant-numeric: tabular-nums; }
+.dot { display: inline-block; width: .7em; height: .7em; border-radius: 50%; margin-right: .45em; vertical-align: middle; }
+.pts { color: var(--gold); font-weight: 800; }
+.d-pairs { display: grid; gap: .5rem; font-size: 1.45rem; }
+.d-pair { display: flex; gap: .7rem; align-items: baseline; flex-wrap: wrap; padding: .35rem 0; border-bottom: 1px solid rgba(var(--tint-rgb), .06); }
+.d-pair .tbl { color: var(--muted); font-size: 1rem; min-width: 4.5rem; font-weight: 700; text-transform: uppercase; }
+.d-pair .vs { color: var(--muted); font-size: 1rem; }
+.d-pair .res { margin-left: auto; color: var(--teal); font-weight: 700; }
+.d-pair.done { opacity: .7; }
+.d-seats { columns: 2; column-gap: 2rem; font-size: 1.6rem; padding-left: 2.2rem; }
+.d-seats li { padding: .2rem 0; }
+.d-empty { font-size: 1.6rem; color: var(--muted); text-align: center; padding: 3rem 1rem; flex: 1 1 100%; }
+`;
+
+function openDisplay() {
+  if (displayWin && !displayWin.closed) { try { displayWin.focus(); } catch(e) {} return; }
+  let win = null;
+  try { win = window.open('', 'idtapthat-display', 'popup,width=1280,height=720'); } catch(e) {}
+  if (!win) {
+    const wrap = document.createElement('div');
+    wrap.id = 'tmm-display-frame-wrap';
+    wrap.innerHTML = `<button class="util-btn" id="tmm-display-close" aria-label="Close display">✕ Close display</button><iframe title="Tournament display"></iframe>`;
+    document.body.appendChild(wrap);
+    wrap.querySelector('#tmm-display-close').addEventListener('click', closeDisplay);
+    win = wrap.querySelector('iframe').contentWindow;
+  }
+  displayWin = win;
+  buildDisplayShell(win.document);
+  updateDisplay();
+}
+
+function closeDisplay() {
+  const wrap = document.getElementById('tmm-display-frame-wrap');
+  if (wrap) wrap.remove();
+  else if (displayWin && !displayWin.closed) { try { displayWin.close(); } catch(e) {} }
+  displayWin = null;
+}
+
+function buildDisplayShell(doc) {
+  doc.title = "I'd Tap That — Tournament Display";
+  doc.head.innerHTML = `<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><style>${DISPLAY_CSS}</style>`;
+  doc.body.innerHTML = `
+    <div class="d-toolbar" role="toolbar" aria-label="Display controls">
+      <button data-act="smaller" title="Smaller text">A−</button>
+      <button data-act="bigger" title="Bigger text">A+</button>
+      <button data-panel="timer" title="Show/hide timer">⏱ Timer</button>
+      <button data-panel="standings" title="Show/hide standings">📊 Standings</button>
+      <button data-panel="pairings" title="Show/hide pairings">⚔️ Pairings</button>
+      <button data-act="fullscreen" title="Full screen">⛶</button>
+    </div>
+    <div class="d-root" id="d-root"></div>`;
+  doc.querySelector('.d-toolbar').addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    const prefs = loadDisplayPrefs();
+    if (btn.dataset.act === 'smaller') prefs.scale = Math.max(.4, +(prefs.scale - .1).toFixed(2));
+    if (btn.dataset.act === 'bigger')  prefs.scale = Math.min(3, +(prefs.scale + .1).toFixed(2));
+    if (btn.dataset.panel) prefs[btn.dataset.panel] = !prefs[btn.dataset.panel];
+    if (btn.dataset.act === 'fullscreen') {
+      const el = doc.documentElement;
+      if (doc.fullscreenElement) doc.exitFullscreen?.(); else el.requestFullscreen?.();
+      return;
+    }
+    saveDisplayPrefs(prefs);
+    updateDisplay();
+  });
+}
+
+function displayTimerHtml() {
+  const tm = matchTimer();
+  const ms = matchTimerRemaining(tm);
+  const state = ms < 0 ? 'overtime' : ms < 5 * 60000 ? 'low' : '';
+  const sub = ms < 0 ? 'Time — finish the current turn' : tm.running ? 'Round time remaining' : 'Paused';
+  return `<div class="d-clock ${state}" id="d-clock">${fmtClock(ms)}</div>
+    <div class="d-clock-sub ${ms < 0 ? 'overtime' : ''}" id="d-clock-sub">${sub}</div>`;
+}
+
+function updateDisplay() {
+  if (!displayWin || displayWin.closed) { displayWin = null; return; }
+  const doc = displayWin.document;
+  const root = doc.getElementById('d-root');
+  if (!root) return;
+  const prefs = loadDisplayPrefs();
+  const css = getComputedStyle(document.documentElement);
+  DISPLAY_TOKENS.forEach(k => doc.documentElement.style.setProperty(k, css.getPropertyValue(k).trim()));
+  doc.documentElement.style.setProperty('--scale', prefs.scale);
+  doc.querySelectorAll('.d-toolbar [data-panel]').forEach(b => b.setAttribute('aria-pressed', String(!!prefs[b.dataset.panel])));
+
+  const title = `<div class="d-head"><div class="d-title">🏆 TOURNAMENT</div><div class="d-round">${
+    TOURNAMENT?.started
+      ? `Round ${TOURNAMENT.currentRound}${TOURNAMENT.format === 'swiss' ? ' of ' + TOURNAMENT.numRounds : ''}${isBestOf3() ? ' · Best of 3' : ''}`
+      : 'Getting ready'}</div></div>`;
+
+  if (!TOURNAMENT?.started) {
+    root.innerHTML = title + (tmmRosterSeated
+      ? `<section class="d-panel" style="flex-basis:100%"><h2>Draft Seating</h2><ol class="d-seats">${
+          tmmRosterDraft.map(p => `<li><span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}</li>`).join('')}</ol></section>`
+      : `<div class="d-empty">Waiting for the tournament to start…</div>`);
+    return;
+  }
+
+  const bo3 = isBestOf3();
+  const tm = matchTimer();
+  let html = title;
+  if (prefs.timer && tm.enabled) html += `<section class="d-panel d-timer" id="d-timer">${displayTimerHtml()}</section>`;
+  if (prefs.standings) {
+    const ranked = rankStandings(computeStandings());
+    html += `<section class="d-panel"><h2>Standings</h2><table>
+      <thead><tr><th>#</th><th>Player</th><th>W–L</th><th>Pts</th><th>OMW</th>${bo3 ? '<th>GW</th>' : ''}</tr></thead>
+      <tbody>${ranked.map((p, i) => `<tr>
+        <td class="num">${i + 1}</td>
+        <td><span class="dot" style="background:${p.color}"></span>${escapeHtml(p.name)}</td>
+        <td class="num">${p.wins}–${p.losses}</td>
+        <td class="num pts">${p.points}</td>
+        <td class="num">${fmtPct(p.omw)}</td>
+        ${bo3 ? `<td class="num">${fmtPct(p.gwp)}</td>` : ''}
+      </tr>`).join('')}</tbody></table></section>`;
+  }
+  if (prefs.pairings) {
+    const tables = TOURNAMENT.rounds[TOURNAMENT.currentRound - 1] || [];
+    html += `<section class="d-panel"><h2>Round ${TOURNAMENT.currentRound} Pairings</h2><div class="d-pairs">${
+      tables.map((t, i) => {
+        const names = t.playerIndices.map(pi => {
+          const p = TOURNAMENT.players[pi];
+          return `<span style="color:${p.color}">${escapeHtml(p.name)}</span>`;
+        }).join(' <span class="vs">vs</span> ');
+        const res = t.bye ? 'Bye'
+          : t.result ? `✔ ${escapeHtml(TOURNAMENT.players[t.result.placement[0]].name)}${t.result.games ? ' ' + t.result.games.join('–') : ''}`
+          : '';
+        return `<div class="d-pair${t.result ? ' done' : ''}"><span class="tbl">Table ${i + 1}</span>${names}<span class="res">${res}</span></div>`;
+      }).join('')}</div></section>`;
+  }
+  root.innerHTML = html;
+}
+
+/* Cheap per-tick refresh: only the clock, not the whole display. */
+function updateDisplayTimer() {
+  if (!displayWin || displayWin.closed) return;
+  const panel = displayWin.document.getElementById('d-timer');
+  if (panel) panel.innerHTML = displayTimerHtml();
 }
 
 /* ============================================================
@@ -3612,6 +4263,25 @@ document.addEventListener('DOMContentLoaded', () => {
     swapPlayersInCurrentRound(a, b);
   });
   document.getElementById('tmm-print-btn').addEventListener('click', printCurrentPairings);
+  document.getElementById('tourn-bestof-sel').addEventListener('change', renderTMM);
+
+  // Match timer
+  document.getElementById('tmm-timer-toggle-btn').addEventListener('click', toggleMatchTimerCard);
+  document.getElementById('tmm-timer-start-btn').addEventListener('click', startPauseMatchTimer);
+  document.getElementById('tmm-timer-reset-btn').addEventListener('click', () => resetMatchTimer());
+  document.getElementById('tmm-timer-min').addEventListener('change', e => setMatchTimerMinutes(e.target.value));
+
+  // Draft seating roulette
+  document.getElementById('tmm-seating-btn').addEventListener('click', openSeatingModal);
+  document.getElementById('seating-spin-btn').addEventListener('click', spinSeating);
+  document.getElementById('seating-apply-btn').addEventListener('click', applySeating);
+  document.getElementById('seating-close').addEventListener('click', closeSeatingModal);
+  document.getElementById('seating-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('seating-modal')) closeSeatingModal();
+  });
+
+  // Projector display
+  document.getElementById('tmm-display-btn').addEventListener('click', openDisplay);
   document.getElementById('tourn-end-early-btn').addEventListener('click', () => {
     if (!confirm('End this tournament now? All pairings and standings will be cleared.')) return;
     clearTournamentState();
@@ -3704,6 +4374,8 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !document.getElementById('options-modal').classList.contains('hidden')) closeOptions();
+    if (e.key === 'Escape' && !document.getElementById('seating-modal').classList.contains('hidden')) closeSeatingModal();
+    if (e.key === 'Escape' && document.getElementById('tmm-display-frame-wrap')) closeDisplay();
   });
 
   // Keyboard shortcuts

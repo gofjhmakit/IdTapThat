@@ -13,7 +13,7 @@ You can test and use it [here](https://gofjhmakit.github.io/IdTapThat/).
 - **Timers** – total, round, turn, and per-player time tracking
 - **Match history** – all games saved to localStorage; view career win/loss stats per player
 - **Scryfall art** – enter a commander name in setup to theme each player's panel with card art
-- **Tournament mode** – Swiss-round or single-elimination bracket, auto-pairing, standings
+- **Tournament mode** – Swiss rounds or single elimination, 1v1 (best of 1 or best of 3) or 4-player pods, rematch-free Swiss pairing, MTG-style tiebreakers (OMW% / GW% / OGW%), draft seating roulette, optional match timer, and a resizable projector display for timer, standings and pairings
 - **Sound design** – Web Audio API SFX for damage, heal, death, round changes, and ambient drone
 - **Accessibility** – ARIA labels, keyboard shortcuts (N/R/M/Escape), high-contrast theme, screen-reader live region, skip link
 - **Offline PWA** – installable on any device; fully playable without internet via service worker
